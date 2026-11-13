@@ -7,184 +7,182 @@
   <meta name="description" content="Official Privacy Policy for GPSnap: GPS Map Camera & Geotag Timestamp (com.gpsnap.app) developed by Aniket Mishra." />
   <meta name="author" content="Aniket Mishra" />
   <meta name="robots" content="index, follow" />
+  <link rel="icon" type="image/svg+xml" href="logo.svg" />
   <style>
     :root {
-      --primary: #059669;
-      --primary-dark: #047857;
-      --primary-light: #ecfdf5;
-      --slate-900: #0f172a;
-      --slate-800: #1e293b;
-      --slate-700: #334155;
-      --slate-600: #475569;
-      --slate-500: #64748b;
-      --slate-200: #e2e8f0;
-      --slate-100: #f1f5f9;
-      --slate-50: #f8fafc;
-      --white: #ffffff;
-      --radius-lg: 16px;
-      --radius-md: 10px;
-      --radius-sm: 6px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --brand-red: #d50000;
+      --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--slate-50);
-      color: var(--slate-800);
-      line-height: 1.7;
-      padding: 32px 16px 64px;
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.68;
+      padding: 24px 16px 64px;
     }
     .container {
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
     }
     .nav-bar {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
     }
-    .nav-bar a {
-      color: var(--primary);
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 0.92rem;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 1.15rem;
     }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #0f172a;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-left: 14px;
+      letter-spacing: 0.04em;
+    }
+    .nav-links a:hover { color: var(--text-main); }
     .card {
-      background: var(--white);
-      border: 1px solid var(--slate-200);
-      border-radius: var(--radius-lg);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       padding: 36px 40px;
-      box-shadow: var(--shadow-sm);
       margin-bottom: 24px;
     }
-    h1 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: var(--slate-900);
-      margin-bottom: 12px;
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
-    h2 {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--slate-900);
-      margin-top: 32px;
-      margin-bottom: 12px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--slate-100);
-    }
-    h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--slate-800);
-      margin-top: 20px;
-      margin-bottom: 8px;
-    }
-    p { margin-bottom: 16px; color: var(--slate-700); font-size: 0.98rem; }
-    ul { margin-bottom: 18px; padding-left: 22px; color: var(--slate-700); }
-    li { margin-bottom: 8px; }
-    a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
-    a:hover { color: var(--primary-dark); }
+    h1 { font-size: 1.7rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+    .badge { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 4px; background: #f3f4f6; color: var(--text-muted); border: 1px solid var(--border); }
     .meta-box {
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: var(--radius-md);
-      padding: 16px 20px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 18px;
       margin-bottom: 24px;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
-      font-size: 0.9rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
     }
-    .meta-box strong { color: var(--slate-500); text-transform: uppercase; font-size: 0.75rem; display: block; margin-bottom: 2px; }
-    .meta-box span, .meta-box a { color: var(--slate-800); font-weight: 600; text-decoration: none; }
+    .meta-box strong { color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 2px; }
+    .meta-box span, .meta-box a { color: var(--text-main); font-weight: 600; text-decoration: none; }
+    h2 { font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-top: 28px; margin-bottom: 10px; }
+    p { margin-bottom: 14px; color: #374151; font-size: 0.95rem; }
+    ul { margin-bottom: 16px; padding-left: 20px; color: #374151; }
+    li { margin-bottom: 6px; font-size: 0.93rem; }
+    code { font-family: var(--font-mono); background: #f3f4f6; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; border: 1px solid var(--border); }
     .callout {
-      border-radius: var(--radius-md);
-      padding: 16px 20px;
-      margin: 20px 0;
+      border-radius: 6px;
+      padding: 16px 18px;
+      margin: 18px 0;
       font-size: 0.92rem;
       line-height: 1.6;
     }
-    .callout-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
-    .callout-info { background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
-    th, td { padding: 10px 14px; border: 1px solid var(--slate-200); text-align: left; }
-    th { background: var(--slate-100); font-weight: 700; }
-    code { background: var(--slate-100); color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 0.86em; }
-    @media (max-width: 640px) { .card { padding: 24px 20px; } }
+    .callout-green { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+    .callout-blue { background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 0.88rem; }
+    th, td { padding: 10px 14px; border: 1px solid var(--border); text-align: left; }
+    th { background: #f9fafb; font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); }
+    a { color: var(--brand-red); text-decoration: underline; }
+    @media (max-width: 640px) { .card { padding: 20px 16px; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="nav-bar">
-      <a href="index.html">← Back to Legal Portal</a>
-      <div>
-        <a href="terms-and-conditions.html" style="margin-right: 14px;">Terms & Conditions</a>
-        <a href="mailto:contact@aniket.one">Contact Support</a>
+    <nav class="nav-bar">
+      <a href="index.html" class="brand-link">
+        <div class="brand-logo"><img src="logo.svg" width="32" height="32" alt="GPSnap" /></div>
+        <span>GPSnap</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">← Portal</a>
+        <a href="terms-and-conditions.html">Terms</a>
+        <a href="mailto:contact@aniket.one">Support</a>
       </div>
-    </div>
+    </nav>
 
-    <div class="card">
-      <h1>Privacy Policy for GPSnap</h1>
-      
+    <main class="card">
+      <div class="header-row">
+        <h1>Privacy Policy</h1>
+        <div class="badge">GOOGLE PLAY 2026 AUDIT SPEC</div>
+      </div>
+
       <div class="meta-box">
-        <div>
-          <strong>App Name</strong>
-          <span>GPSnap: GPS Map Camera</span>
-        </div>
-        <div>
-          <strong>Package Name</strong>
-          <span><code>com.gpsnap.app</code></span>
-        </div>
-        <div>
-          <strong>Developer</strong>
-          <span>Aniket Mishra</span>
-        </div>
-        <div>
-          <strong>Effective Date</strong>
-          <span>November 13, 2026</span>
-        </div>
-        <div>
-          <strong>Support Email</strong>
-          <a href="mailto:contact@aniket.one">contact@aniket.one</a>
-        </div>
+        <div><strong>Application</strong><span>GPSnap: GPS Map Camera</span></div>
+        <div><strong>Package ID</strong><span><code>com.gpsnap.app</code></span></div>
+        <div><strong>Developer</strong><span>Aniket Mishra</span></div>
+        <div><strong>Effective Date</strong><span>November 13, 2026</span></div>
+        <div><strong>Direct Contact</strong><a href="mailto:contact@aniket.one">contact@aniket.one</a></div>
       </div>
 
-      <div class="callout callout-success">
-        <strong>Zero-Cloud Local Storage Promise:</strong> GPSnap operates on a local-first processing architecture. We do not operate remote servers to collect, upload, store, or sell your photos, videos, notes, or GPS trajectories.
+      <div class="callout callout-green">
+        <strong>Zero-Cloud Guarantee:</strong> GPSnap operates with an on-device local architecture. Photos, videos, audio, PDF reports, and location coordinates are processed and stored exclusively on your device. We do not upload or harvest your media on developer servers.
       </div>
 
-      <h2>1. Overview & Commitment to Privacy</h2>
+      <h2>1. Overview & Purpose</h2>
       <p>
         This Privacy Policy explains how <strong>GPSnap</strong> ("we", "our", or "us") accesses, processes, and protects your information when you use our Android mobile application. GPSnap is designed for professionals and individuals who need accurate geolocation and timestamp overlays on their photography. We respect your privacy and design our software to process media locally on your device.
       </p>
 
       <h2>2. Sensitive Permissions & Purpose Justification</h2>
-      <p>To deliver real-time camera stamping and field documentation, GPSnap utilizes the following Android runtime permissions:</p>
+      <p>GPSnap requests specific runtime permissions under strict Google Play Developer Policy guidelines:</p>
       <ul>
-        <li><strong>Precise & Approximate Location (<code>ACCESS_FINE_LOCATION</code>, <code>ACCESS_COARSE_LOCATION</code>):</strong> Used strictly in the foreground while the camera/app is open to retrieve your GPS coordinates, altitude, compass bearing, speed, and accuracy. This data is burned into your photo/video stamps, used to look up street addresses, fetch local weather, and display mini-map snapshots.</li>
-        <li><strong>Camera (<code>CAMERA</code>):</strong> Used to provide the live camera viewfinder, adjust focus/exposure, and capture photos and video recordings.</li>
-        <li><strong>Microphone (<code>RECORD_AUDIO</code>):</strong> Used exclusively when you explicitly record video with audio. Never accessed during photo snapping or in the background.</li>
-        <li><strong>Storage & Media Access (<code>READ_MEDIA_IMAGES</code>, <code>READ_MEDIA_VIDEO</code>, <code>READ_MEDIA_VISUAL_USER_SELECTED</code>, <code>READ_EXTERNAL_STORAGE</code>, <code>WRITE_EXTERNAL_STORAGE</code>):</strong> Used to save stamped media and PDF inspection reports to your device's shared storage via Android Scoped Storage / MediaStore API, show past captures in the app gallery, and allow custom logo watermarks.</li>
-        <li><strong>Network Access (<code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code>):</strong> Used to download map tiles, convert coordinates to street addresses, fetch current weather and air quality (AQI) from Open-Meteo, load sponsor ads via Google AdMob, and check for app updates.</li>
-        <li><strong>Device Accounts (<code>GET_ACCOUNTS</code>):</strong> Used solely if you choose to connect a Google account for optional Google Drive backup sync.</li>
-        <li><strong>Vibration (<code>VIBRATE</code>):</strong> Used for optional tactile shutter feedback.</li>
+        <li><strong>Precise &amp; Approximate Location (<code>ACCESS_FINE_LOCATION</code>, <code>ACCESS_COARSE_LOCATION</code>):</strong> Queried strictly in the foreground while the camera is active to calculate your real-time coordinates, altitude, heading, and speed, embed stamps onto your captures, and query reverse geocoding for street addresses.</li>
+        <li><strong>Camera (<code>CAMERA</code>):</strong> Powers the live viewfinder preview, automatic and manual exposure/focus, and captures photos and videos with real-time on-screen stamp overlays.</li>
+        <li><strong>Microphone (<code>RECORD_AUDIO</code>):</strong> Captures audio tracks exclusively when you explicitly record a video with sound enabled. Microphone access is never initialized during photo capture mode.</li>
+        <li><strong>Storage &amp; Scoped Media (<code>READ_MEDIA_IMAGES</code>, <code>READ_MEDIA_VIDEO</code>, <code>READ_MEDIA_VISUAL_USER_SELECTED</code>, <code>READ_EXTERNAL_STORAGE</code>, <code>WRITE_EXTERNAL_STORAGE</code>):</strong> Saves stamped photos, videos, and generated PDF reports to your device storage via Android Scoped Storage / MediaStore API, and allows selecting custom logo watermarks from your gallery.</li>
+        <li><strong>Network Access (<code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code>):</strong> Downloads map tiles (OpenStreetMap &amp; Google Maps), converts coordinates into human-readable addresses via reverse geocoding, fetches ambient weather and Air Quality Index (AQI) values, and loads sponsor advertisements via Google AdMob.</li>
+        <li><strong>Device Accounts (<code>GET_ACCOUNTS</code>):</strong> Utilized solely if you explicitly choose to authenticate your personal Google account for optional Google Drive backup sync.</li>
+        <li><strong>Vibration (<code>VIBRATE</code>):</strong> Provides tactile shutter feedback.</li>
       </ul>
 
       <h2>3. Foreground-Only Location Tracking</h2>
-      <div class="callout callout-info">
-        <strong>No Background Location Services:</strong> GPSnap does not request or use <code>ACCESS_BACKGROUND_LOCATION</code>. Location hardware polling stops immediately when you navigate away from the camera screen or close the app.
+      <div class="callout callout-blue">
+        <strong>No Background Location Services:</strong> GPSnap does not declare or request the Android <code>ACCESS_BACKGROUND_LOCATION</code> permission. GPS hardware polling stops immediately when you navigate away from the camera screen or close the app.
       </div>
 
       <h2>4. Third-Party SDKs & Services</h2>
       <p>GPSnap integrates trusted third-party SDKs that operate under their respective privacy policies:</p>
       <ul>
-        <li><strong>Google Play Services (Location & Maps SDK):</strong> For fused GPS location and map views. (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>)</li>
+        <li><strong>Google Play Services (Location &amp; Maps SDK):</strong> For fused GPS location and map views. (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>)</li>
         <li><strong>Google AdMob:</strong> For displaying sponsor advertisements. AdMob may process your device's Advertising ID, IP address, and interaction events. (<a href="https://support.google.com/admob/answer/6128543" target="_blank" rel="noopener">AdMob Policies</a>)</li>
         <li><strong>Google ML Kit (On-Device OCR):</strong> Processes camera frames 100% locally on your phone hardware for landmark and address recognition. Zero frames or recognized text are sent to Google cloud servers.</li>
-        <li><strong>OpenStreetMap & Nominatim:</strong> Provides map tiles and reverse geocoding lookups. (<a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener">OSMF Privacy Policy</a>)</li>
+        <li><strong>OpenStreetMap &amp; Nominatim:</strong> Provides map tiles and reverse geocoding lookups. (<a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener">OSMF Privacy Policy</a>)</li>
         <li><strong>Open-Meteo:</strong> Provides localized weather and Air Quality Index (AQI) based strictly on anonymous coordinates. (<a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener">Open-Meteo Terms</a>)</li>
         <li><strong>Google Play In-App Updates:</strong> Ensures users receive seamless updates via Google Play.</li>
       </ul>
@@ -198,9 +196,7 @@
       <p>
         All photos, videos, PDF reports, and preferences reside locally on your device. We do not store or retain your files on any external server.
       </p>
-      <p>
-        <strong>How to Delete Data:</strong>
-      </p>
+      <p><strong>How to Delete Data:</strong></p>
       <ul>
         <li>Delete files directly from the in-app Gallery or your device's Files/Photos app.</li>
         <li>Clear app data and preferences via <strong>Android Settings → Apps → GPSnap → Storage → Clear Storage</strong>.</li>
@@ -208,7 +204,7 @@
         <li>To request deletion of any support email correspondence, contact <a href="mailto:contact@aniket.one">contact@aniket.one</a>. All requests are permanently resolved within 30 days.</li>
       </ul>
 
-      <h2>7. Children's Privacy</h2>
+      <h2>7. Children's Privacy (COPPA)</h2>
       <p>
         GPSnap is not directed to children under 13 years of age (or under 16 in the EU). We do not knowingly collect personal information from children.
       </p>
@@ -224,7 +220,7 @@
         <strong>Developer:</strong> Aniket Mishra<br />
         <strong>Email:</strong> <a href="mailto:contact@aniket.one">contact@aniket.one</a>
       </p>
-    </div>
+    </main>
   </div>
 </body>
 </html>

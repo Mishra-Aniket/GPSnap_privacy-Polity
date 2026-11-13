@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="gpsnapBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A2433"/>
+      <stop offset="100%" stop-color="#0B0E15"/>
+    </linearGradient>
+    <linearGradient id="gpsnapPinGrad" x1="297" y1="215" x2="393" y2="347" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF5252"/>
+      <stop offset="100%" stop-color="#D50000"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle Background -->
+  <path d="M0,90 Q0,0 90,0 L422,0 Q512,0 512,90 L512,422 Q512,512 422,512 L90,512 Q0,512 0,422 Z" fill="url(#gpsnapBgGrad)"/>
+
+  <!-- Centered Camera Elements -->
+  <g transform="translate(256, 261) scale(0.9) translate(-256, -256)">
+    <!-- Shutter Button -->
+    <path d="M130,136 L170,136 C174,136 178,140 178,144 L178,150 L122,150 L122,144 C122,140 126,136 130,136 Z" fill="#B0BEC5"/>
+
+    <!-- White Camera Body -->
+    <path d="M100,180 C100,160 116,144 136,144 L170,144 C175,144 180,141 182,137 L192,120 C198,110 209,104 221,104 L291,104 C303,104 314,110 320,120 L330,137 C332,141 337,144 342,144 L376,144 C396,144 412,160 412,180 L412,340 C412,360 396,376 376,376 L136,376 C116,376 100,360 100,340 Z" fill="#FFFFFF" stroke="#ECEFF1" stroke-width="3"/>
+
+    <!-- Flash Window -->
+    <path d="M340,164 L374,164 C377,164 380,167 380,170 L380,180 C380,183 377,186 374,186 L340,186 C337,186 334,183 334,180 L334,170 C334,167 337,164 340,164 Z" fill="#ECEFF1" stroke="#CFD8DC" stroke-width="1.5"/>
+
+    <!-- Status Sensor -->
+    <circle cx="156" cy="192" r="5" fill="#37474F"/>
+
+    <!-- Lens Outer Ring -->
+    <circle cx="240" cy="260" r="90" fill="#ECEFF1" stroke="#CFD8DC" stroke-width="3"/>
+
+    <!-- Lens Dark Ring 1 -->
+    <circle cx="240" cy="260" r="78" fill="#37474F"/>
+
+    <!-- Lens Dark Ring 2 (Grip) -->
+    <circle cx="240" cy="260" r="68" fill="#1C2329"/>
+
+    <!-- Inner Lens Glass -->
+    <circle cx="240" cy="260" r="52" fill="#0D131A"/>
+
+    <!-- Lens Highlight/Glass Reflection -->
+    <path d="M200,225 C210,215 230,210 245,215 A52,52 0 0,1 200,225 Z" fill="#FFFFFF" fill-opacity="0.25"/>
+
+    <!-- Red Location Pin -->
+    <path d="M345,215 C318,215 297,236 297,263 C297,300 335,335 345,347 C355,335 393,300 393,263 C393,236 372,215 345,215 Z" fill="url(#gpsnapPinGrad)" stroke="#B71C1C" stroke-width="1.5"/>
+
+    <!-- Inner White Pin Circle -->
+    <circle cx="345" cy="263" r="20" fill="#FFFFFF"/>
+
+    <!-- GPSnap Red Text on camera body -->
+    <text x="122" y="328" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="20" fill="#D50000" letter-spacing="-0.5">GPSnap</text>
+  </g>
+</svg>
