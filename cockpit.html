@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GPSnap • Remote Inspection Cockpit</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #131c2e;
+      --card-border: #1e293b;
+      --accent: #00E676;
+      --accent-glow: rgba(0, 230, 118, 0.25);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --cyan: #00E5FF;
+      --amber: #FFD54F;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; flex-direction: column; }
+    .container { max-width: 900px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--card-border); }
+    .header-title h1 { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+    .header-title p { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+    .status-badge { display: flex; align-items: center; gap: 6px; background: rgba(0, 230, 118, 0.15); border: 1px solid var(--accent); color: var(--accent); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
+    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+    /* Badges Bar */
+    .badge-bar { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tech-badge { background: #182338; border: 1px solid #283956; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+    .tech-badge.gnss { color: var(--cyan); border-color: rgba(0, 229, 255, 0.3); }
+    .tech-badge.ai { color: var(--amber); border-color: rgba(255, 213, 79, 0.3); }
+
+    /* Grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+    .card h3 { font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.6px; margin-bottom: 4px; }
+    .card .val { font-size: 18px; font-weight: 800; color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .card .sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Address & Map */
+    .wide-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; }
+    .addr-text { font-size: 13.5px; font-weight: 600; color: #e2e8f0; line-height: 1.4; margin-top: 4px; }
+    #map { height: 220px; border-radius: 10px; margin-top: 12px; border: 1px solid var(--card-border); }
+
+    /* Capture Button */
+    .btn-capture {
+      background: linear-gradient(135deg, #00E676 0%, #00C853 100%);
+      color: #0b0f19;
+      border: none;
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 20px var(--accent-glow);
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .btn-capture:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0, 230, 118, 0.4); }
+    .btn-capture:active { transform: scale(0.98); }
+    .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+      z-index: 9999;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-title">
+        <h1>🛰️ GPSnap • Cockpit</h1>
+        <p>Live Worldwide Tele-Inspection & Remote Shutter</p>
+      </div>
+      <div class="status-badge" id="connStatus">
+        <div class="pulse-dot"></div>
+        <span id="connText">CONNECTING</span>
+      </div>
+    </div>
+
+    <!-- Live Tech Badges -->
+    <div class="badge-bar">
+      <div class="tech-badge gnss" id="gnssBadge">🛰️ GNSS: Searching Satellites...</div>
+      <div class="tech-badge ai" id="aiBadge">🧠 AI Vision: Active</div>
+    </div>
+
+    <!-- Telemetry Metric Cards -->
+    <div class="grid">
+      <div class="card">
+        <h3>Coordinates</h3>
+        <div class="val" id="coordsVal">--</div>
+        <div class="sub" id="accVal">Accuracy: Acquiring...</div>
+      </div>
+      <div class="card">
+        <h3>Altitude & Speed</h3>
+        <div class="val" id="altVal">--</div>
+        <div class="sub" id="speedVal">Speed: 0 km/h</div>
+      </div>
+      <div class="card">
+        <h3>Heading & Compass</h3>
+        <div class="val" id="headingVal">--</div>
+        <div class="sub" id="orientationVal">Pitch: 0° • Roll: 0°</div>
+      </div>
+      <div class="card">
+        <h3>Weather & Sensors</h3>
+        <div class="val" id="weatherVal">--</div>
+        <div class="sub" id="sensorVal">AQI • Pressure • Humid</div>
+      </div>
+    </div>
+
+    <!-- Address & Map Card -->
+    <div class="wide-card">
+      <h3 style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Live Field Address</h3>
+      <div class="addr-text" id="addressVal">Waiting for location broadcast from device...</div>
+      <div id="map"></div>
+    </div>
+
+    <!-- Trigger Shutter Button -->
+    <button class="btn-capture" id="btnCapture" onclick="triggerRemoteCapture()">
+      <span>📸</span> TRIGGER REMOTE VERIFIED CAPTURE
+    </button>
+  </div>
+
+  <div class="toast" id="toast">Photo capture signal sent to device!</div>
+
+  <script>
+    // Extract room id from URL (?room=XYZ or #XYZ)
+    const urlParams = new URLSearchParams(window.location.search);
+    let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'default';
+
+    let map, marker;
+    let lastLat = 0, lastLon = 0;
+
+    function initMap() {
+      map = L.map('map', { zoomControl: false, attributionControl: false }).setView([28.6139, 77.2090], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      marker = L.marker([28.6139, 77.2090]).addTo(map);
+    }
+    initMap();
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    // Connect to Free Public NTFY SSE Channel for Real-Time Telemetry
+    const teleTopic = 'gpsnap-tele-' + roomId;
+    const cmdTopic = 'gpsnap-cmd-' + roomId;
+
+    function connectTelemetry() {
+      const sseUrl = 'https://ntfy.sh/' + teleTopic + '/sse';
+      const eventSource = new EventSource(sseUrl);
+
+      eventSource.onopen = () => {
+        document.getElementById('connText').innerText = 'LIVE CONNECTED';
+        document.getElementById('connStatus').style.borderColor = '#00E676';
+        document.getElementById('connStatus').style.color = '#00E676';
+      };
+
+      eventSource.onerror = () => {
+        document.getElementById('connText').innerText = 'RECONNECTING';
+        document.getElementById('connStatus').style.borderColor = '#FFD54F';
+        document.getElementById('connStatus').style.color = '#FFD54F';
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          const wrapper = JSON.parse(event.data);
+          const raw = wrapper.message;
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          applyTelemetry(data);
+        } catch(e) {
+          // might be raw JSON directly
+          try {
+            const data = JSON.parse(event.data);
+            if (data.latitude !== undefined) applyTelemetry(data);
+          } catch(_e) {}
+        }
+      };
+    }
+
+    function applyTelemetry(d) {
+      if (!d) return;
+
+      if (d.event === 'session_ended' || d.status === 'expired') {
+        document.getElementById('connText').innerText = 'SESSION EXPIRED / OFFLINE';
+        document.getElementById('connStatus').style.borderColor = '#FF5252';
+        document.getElementById('connStatus').style.color = '#FF5252';
+        document.getElementById('btnCapture').disabled = true;
+        document.getElementById('addressVal').innerText = '⚠️ Field camera has closed or exited inspection mode.';
+        showToast('⚠️ Field camera left inspection mode or disconnected.');
+        return;
+      }
+
+      document.getElementById('connText').innerText = 'LIVE CONNECTED';
+      document.getElementById('connStatus').style.borderColor = '#00E676';
+      document.getElementById('connStatus').style.color = '#00E676';
+      document.getElementById('btnCapture').disabled = false;
+
+      if (d.latitude && d.longitude) {
+        document.getElementById('coordsVal').innerText = d.latitude.toFixed(5) + '°, ' + d.longitude.toFixed(5) + '°';
+        document.getElementById('accVal').innerText = 'Accuracy: ±' + (d.accuracy ? d.accuracy.toFixed(1) : '1.5') + ' M';
+        
+        if (Math.abs(lastLat - d.latitude) > 0.0001 || Math.abs(lastLon - d.longitude) > 0.0001) {
+          lastLat = d.latitude;
+          lastLon = d.longitude;
+          map.setView([d.latitude, d.longitude], 16);
+          marker.setLatLng([d.latitude, d.longitude]);
+        }
+      }
+
+      if (d.altitude !== undefined) {
+        document.getElementById('altVal').innerText = Math.round(d.altitude) + ' M';
+      }
+      if (d.heading !== undefined) {
+        document.getElementById('headingVal').innerText = Math.round(d.heading) + '° ' + (d.headingDirection || '');
+        document.getElementById('orientationVal').innerText = 'Pitch: ' + Math.round(d.pitch || 0) + '° • Roll: ' + Math.round(d.roll || 0) + '°';
+      }
+      if (d.address) {
+        document.getElementById('addressVal').innerText = d.address + (d.city ? (' • ' + d.city) : '');
+      }
+      if (d.gnssBadge) {
+        document.getElementById('gnssBadge').innerText = d.gnssBadge;
+      }
+      if (d.aiSceneBadge) {
+        document.getElementById('aiBadge').innerText = d.aiSceneBadge;
+      }
+      if (d.weatherTemp) {
+        document.getElementById('weatherVal').innerText = d.weatherTemp;
+        document.getElementById('sensorVal').innerText = (d.humidity ? ('💧 ' + d.humidity + ' • ') : '') + (d.aqi ? ('🌿 AQI ' + d.aqi) : '');
+      }
+      if (d.event === 'captured') {
+        showToast('✅ Photo captured & verified on device at ' + (d.time || 'just now') + '!');
+      }
+    }
+
+    async function triggerRemoteCapture() {
+      const btn = document.getElementById('btnCapture');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> CAPTURING ON DEVICE...';
+      
+      try {
+        await fetch('https://ntfy.sh/' + cmdTopic, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'capture', timestamp: Date.now() })
+        });
+        showToast('📸 Verified capture command sent to device!');
+      } catch (err) {
+        showToast('❌ Command error: ' + err.message);
+      } finally {
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = '<span>📸</span> TRIGGER REMOTE VERIFIED CAPTURE';
+        }, 2000);
+      }
+    }
+
+    connectTelemetry();
+  </script>
+</body>
+</html>
