@@ -20,7 +20,7 @@
     :root, [data-theme="jetblack"] {
       --bg-space: #000000;
       --glass-surface: rgba(10, 12, 16, 0.88);
-      --glass-elevated: rgba(18, 22, 30, 0.92);
+      --glass-elevated: rgba(16, 20, 28, 0.94);
       --glass-border: rgba(255, 255, 255, 0.12);
       --glass-border-glow: rgba(16, 185, 129, 0.35);
       
@@ -37,14 +37,15 @@
       --neon-rose: #ef4444;
       
       --chip-bg: rgba(255, 255, 255, 0.06);
-      --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.75), 0 2px 8px rgba(0, 0, 0, 0.5);
+      --card-shadow: 0 16px 45px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0, 0, 0, 0.5);
       --map-filter: contrast(1.08) brightness(0.95);
+      --modal-bg: rgba(8, 10, 14, 0.94);
     }
 
     [data-theme="light"] {
       --bg-space: #f1f5f9;
       --glass-surface: rgba(255, 255, 255, 0.92);
-      --glass-elevated: rgba(248, 250, 252, 0.96);
+      --glass-elevated: rgba(248, 250, 252, 0.98);
       --glass-border: rgba(0, 0, 0, 0.12);
       --glass-border-glow: rgba(5, 150, 105, 0.35);
       
@@ -61,8 +62,9 @@
       --neon-rose: #dc2626;
       
       --chip-bg: rgba(0, 0, 0, 0.05);
-      --card-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+      --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
       --map-filter: contrast(1.02) brightness(1.0);
+      --modal-bg: rgba(255, 255, 255, 0.96);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -117,10 +119,11 @@
       z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       padding: 6px 14px;
       border-radius: 9999px;
       pointer-events: auto;
+      max-width: calc(100vw - 32px);
     }
 
     .gcs-brand-mark {
@@ -141,25 +144,25 @@
       box-shadow: 0 0 12px var(--neon-emerald-glow);
     }
     .gcs-brand-title {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 800;
       letter-spacing: -0.2px;
       color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .gcs-status-radar {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       color: var(--neon-emerald);
       background: var(--neon-emerald-glow);
       border: 1px solid rgba(16, 185, 129, 0.3);
-      padding: 3px 9px;
+      padding: 3px 8px;
       border-radius: 12px;
       letter-spacing: 0.3px;
     }
@@ -187,7 +190,7 @@
       align-items: center;
       gap: 8px;
       font-family: ui-monospace, monospace;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
     }
     .gcs-coords-text { color: var(--neon-cyan); }
@@ -197,7 +200,7 @@
       color: var(--neon-emerald);
       padding: 2px 6px;
       border-radius: 4px;
-      font-size: 10px;
+      font-size: 9.5px;
     }
 
     .gcs-island-actions {
@@ -206,8 +209,8 @@
       gap: 6px;
     }
 
-    /* THEME SWITCHER TOGGLE (Light Mode & Jet Black) */
-    .gcs-btn-theme {
+    /* ACTION PILL BUTTONS IN ISLAND */
+    .gcs-btn-island-pill {
       background: var(--chip-bg);
       border: 1px solid var(--glass-border);
       border-radius: 14px;
@@ -220,9 +223,33 @@
       align-items: center;
       gap: 5px;
       transition: all 0.15s ease;
+      white-space: nowrap;
     }
-    .gcs-btn-theme:hover {
+    .gcs-btn-island-pill:hover {
       border-color: var(--neon-emerald);
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .gcs-btn-island-pill.active {
+      background: var(--neon-emerald);
+      color: #000;
+      border-color: var(--neon-emerald);
+      box-shadow: 0 0 10px var(--neon-emerald-glow);
+    }
+    .gcs-btn-island-pill.active svg {
+      stroke: #000;
+    }
+
+    .live-dot-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--neon-rose);
+      box-shadow: 0 0 6px var(--neon-rose);
+      animation: liveBlink 1.4s infinite;
+    }
+    @keyframes liveBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
     }
 
     .gcs-room-pill {
@@ -241,30 +268,31 @@
       font-family: ui-monospace, monospace;
       font-size: 11px;
       font-weight: 700;
-      width: 95px;
+      width: 90px;
       outline: none;
     }
 
     .gcs-btn-icon {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: var(--chip-bg);
       border: 1px solid var(--glass-border);
-      color: var(--text-primary);
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.15s ease;
     }
     .gcs-btn-icon:hover {
-      background: rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+      border-color: var(--text-primary);
       transform: scale(1.05);
     }
 
     /* =========================================================================
-       3. TOP-RIGHT MAP CONTROLS CAPSULE
+       3. TOP-RIGHT MAP CONTROLS & MEASURE TOOL
        ========================================================================= */
     .gcs-map-controls-pill {
       position: absolute;
@@ -275,58 +303,96 @@
       align-items: center;
       gap: 4px;
       padding: 4px;
-      border-radius: 14px;
+      border-radius: 12px;
+      pointer-events: auto;
     }
+
     .gcs-layer-btn {
       background: transparent;
-      border: 1px solid transparent;
-      border-radius: 10px;
-      padding: 5px 10px;
+      border: none;
       color: var(--text-secondary);
       font-size: 11px;
       font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 8px;
       cursor: pointer;
+      transition: all 0.15s ease;
       display: flex;
       align-items: center;
-      gap: 5px;
-      transition: all 0.15s ease;
+      gap: 4px;
     }
     .gcs-layer-btn:hover {
       color: var(--text-primary);
-      background: var(--chip-bg);
+      background: rgba(255, 255, 255, 0.08);
     }
     .gcs-layer-btn.active {
-      background: var(--neon-emerald-glow);
-      border-color: var(--neon-emerald);
-      color: var(--neon-emerald);
+      background: var(--neon-emerald);
+      color: #000;
+      box-shadow: 0 0 10px var(--neon-emerald-glow);
     }
 
     /* =========================================================================
-       4. LEFT FLOATING AVIONICS & POLAR SATELLITE RADAR HUD (Left Column)
+       4. LEFT FLOATING AVIONICS & POLAR SATELLITE RADAR HUD (Hideable/Collapsible)
        ========================================================================= */
     .gcs-hud-drawer {
       position: absolute;
-      top: 76px;
+      top: 80px;
       left: 20px;
       width: 320px;
       z-index: 1000;
+      border-radius: 18px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       gap: 10px;
       pointer-events: auto;
-      max-height: calc(100vh - 190px);
-      overflow-y: auto;
-      border-radius: 18px;
-      padding: 14px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .gcs-hud-drawer.collapsed {
+      transform: translateX(-120%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Floating Dock Pill when HUD is collapsed */
+    .gcs-radar-dock-pill {
+      position: absolute;
+      top: 85px;
+      left: 18px;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 11.5px;
+      font-weight: 800;
+      font-family: ui-monospace, monospace;
+      color: var(--neon-emerald);
+      border: 1px solid var(--neon-emerald);
+      background: var(--glass-elevated);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s ease;
+    }
+    .gcs-radar-dock-pill:hover {
+      transform: scale(1.04);
+      background: var(--neon-emerald-glow);
+    }
+    .gcs-radar-dock-pill.visible {
+      display: flex;
     }
 
     .gcs-hud-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 7px;
     }
     .gcs-hud-title {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.6px;
@@ -335,68 +401,72 @@
       align-items: center;
       gap: 6px;
     }
+    .gcs-hud-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
 
-    /* SATELLITE POLAR RADAR DISH CANVAS */
+    /* Polar Radar Scope Canvas */
     .polar-radar-container {
       position: relative;
       width: 100%;
-      height: 170px;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 12px;
+      height: 160px;
+      background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, rgba(0, 0, 0, 0.7) 75%);
       border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
     #radarCanvas {
       width: 100%;
       height: 100%;
+      display: block;
     }
     .radar-stats-overlay {
       position: absolute;
       bottom: 6px;
-      left: 8px;
-      right: 8px;
+      left: 10px;
+      right: 10px;
       display: flex;
       justify-content: space-between;
-      font-size: 10px;
       font-family: ui-monospace, monospace;
+      font-size: 9.5px;
       font-weight: 700;
-      color: var(--neon-cyan);
+      color: var(--text-secondary);
       pointer-events: none;
     }
 
-    /* Artificial Horizon Gimbal Card */
+    /* Gimbal Heading Strip */
     .gimbal-strip-card {
       background: var(--chip-bg);
       border: 1px solid var(--glass-border);
       border-radius: 10px;
-      padding: 8px 10px;
+      padding: 7px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     .gimbal-dial-wrapper {
-      width: 34px;
-      height: 34px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      border: 1.5px solid var(--glass-border);
+      border: 1.5px solid var(--neon-cyan);
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      background: rgba(0,0,0,0.3);
     }
     .gimbal-needle-bar {
-      width: 3.5px;
-      height: 24px;
-      background: linear-gradient(to bottom, var(--neon-rose) 50%, var(--text-secondary) 50%);
-      border-radius: 2px;
-      transition: transform 0.25s ease-out;
+      width: 2px;
+      height: 14px;
+      background: var(--neon-rose);
+      transform-origin: center center;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Two-Column Telemetry Mini Matrix */
     .gcs-mini-matrix {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -412,31 +482,218 @@
       gap: 1px;
     }
     .gcs-tile-label {
-      font-size: 9px;
+      font-size: 8.5px;
       color: var(--text-tertiary);
       text-transform: uppercase;
       font-weight: 700;
     }
     .gcs-tile-val {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 800;
       font-family: ui-monospace, monospace;
       color: var(--text-primary);
     }
     .gcs-tile-sub {
-      font-size: 9.5px;
+      font-size: 9px;
       color: var(--text-secondary);
     }
 
     /* =========================================================================
-       5. BOTTOM FLOATING MISSION COMMAND CENTER CAPSULE (Center-Bottom)
+       5. FLOATING DRONE FPV CAMERA & PHOTO VIEW WINDOW (Picture-In-Picture)
+       ========================================================================= */
+    .gcs-fpv-window {
+      position: absolute;
+      top: 75px;
+      right: 20px;
+      width: 380px;
+      z-index: 1050;
+      border-radius: 18px;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1.5px solid var(--glass-border-glow);
+      pointer-events: auto;
+      box-shadow: var(--card-shadow), 0 0 30px rgba(16, 185, 129, 0.15);
+      animation: fpvPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes fpvPopIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .gcs-fpv-window.active {
+      display: flex;
+    }
+    .gcs-fpv-window.fullscreen {
+      top: 50% !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translate(-50%, -50%) !important;
+      width: min(880px, 92vw) !important;
+      max-height: 88vh !important;
+      z-index: 2000 !important;
+    }
+
+    .gcs-fpv-header {
+      background: var(--glass-elevated);
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .gcs-fpv-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--chip-bg);
+      padding: 2px;
+      border-radius: 8px;
+    }
+    .gcs-fpv-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .gcs-fpv-tab.active {
+      background: var(--neon-emerald);
+      color: #000;
+    }
+
+    .gcs-fpv-screen-box {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gcs-fpv-window.fullscreen .gcs-fpv-screen-box {
+      height: 520px;
+    }
+
+    #fpvFeedImage {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Drone HUD Reticle Overlay inside Viewfinder */
+    .fpv-hud-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .fpv-reticle-crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .fpv-reticle-crosshair::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      right: -10px;
+      height: 1px;
+      background: rgba(16, 185, 129, 0.6);
+    }
+    .fpv-reticle-crosshair::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: -10px;
+      bottom: -10px;
+      width: 1px;
+      background: rgba(16, 185, 129, 0.6);
+    }
+    .fpv-bracket-tl {
+      position: absolute; top: 12px; left: 12px; width: 14px; height: 14px;
+      border-top: 2px solid var(--neon-emerald); border-left: 2px solid var(--neon-emerald);
+    }
+    .fpv-bracket-tr {
+      position: absolute; top: 12px; right: 12px; width: 14px; height: 14px;
+      border-top: 2px solid var(--neon-emerald); border-right: 2px solid var(--neon-emerald);
+    }
+    .fpv-bracket-bl {
+      position: absolute; bottom: 12px; left: 12px; width: 14px; height: 14px;
+      border-bottom: 2px solid var(--neon-emerald); border-left: 2px solid var(--neon-emerald);
+    }
+    .fpv-bracket-br {
+      position: absolute; bottom: 12px; right: 12px; width: 14px; height: 14px;
+      border-bottom: 2px solid var(--neon-emerald); border-right: 2px solid var(--neon-emerald);
+    }
+
+    .fpv-hud-top-bar {
+      display: flex;
+      justify-content: space-between;
+      font-family: ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    }
+    .fpv-hud-bot-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-family: ui-monospace, monospace;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    }
+
+    .fpv-standby-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .gcs-fpv-footer {
+      background: var(--glass-elevated);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    /* =========================================================================
+       6. BOTTOM FLOATING MISSION COMMAND CENTER CAPSULE (Center-Bottom)
        ========================================================================= */
     .gcs-command-center {
       position: absolute;
-      bottom: 22px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: min(840px, calc(100vw - 40px));
+      width: min(880px, calc(100vw - 36px));
       z-index: 1000;
       border-radius: 22px;
       padding: 12px 18px;
@@ -444,23 +701,78 @@
       flex-direction: column;
       gap: 10px;
       pointer-events: auto;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    .gcs-command-center.minimized {
+      transform: translate(-50%, calc(100% - 24px));
+    }
+
+    .gcs-minimize-handle {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass-elevated);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.15s ease;
+    }
+    .gcs-minimize-handle:hover {
+      color: var(--neon-emerald);
+      border-color: var(--neon-emerald);
+      transform: translateX(-50%) translateY(-1px);
+    }
+
+    /* Address Row - Clickable for Full Cadastral Details */
     .gcs-address-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 8px;
+      transition: background 0.15s ease;
+    }
+    .gcs-address-row:hover {
+      background: rgba(255, 255, 255, 0.05);
     }
     .gcs-address-main {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text-primary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+    .gcs-view-full-badge {
+      background: var(--chip-bg);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     .gcs-parcel-chips {
       display: flex;
       align-items: center;
@@ -472,7 +784,7 @@
       border: 1px solid var(--glass-border);
       border-radius: 6px;
       padding: 3px 7px;
-      font-size: 10px;
+      font-size: 9.5px;
       color: var(--text-secondary);
       font-weight: 600;
     }
@@ -494,8 +806,8 @@
       color: #042419;
       border: 1px solid #34d399;
       border-radius: 12px;
-      padding: 12px 20px;
-      font-size: 13.5px;
+      padding: 11px 18px;
+      font-size: 13px;
       font-weight: 800;
       letter-spacing: 0.4px;
       cursor: pointer;
@@ -526,7 +838,7 @@
       color: #042419;
       padding: 2px 6px;
       border-radius: 4px;
-      font-size: 10px;
+      font-size: 9.5px;
       font-family: ui-monospace, monospace;
       font-weight: 800;
     }
@@ -535,7 +847,7 @@
       background: var(--chip-bg);
       border: 1px solid var(--glass-border);
       border-radius: 10px;
-      padding: 10px 14px;
+      padding: 9px 13px;
       color: var(--text-primary);
       font-size: 11.5px;
       font-weight: 700;
@@ -544,6 +856,7 @@
       align-items: center;
       gap: 6px;
       transition: all 0.15s ease;
+      white-space: nowrap;
     }
     .btn-gcs-sub:hover {
       border-color: var(--text-primary);
@@ -551,8 +864,166 @@
     }
 
     /* =========================================================================
-       6. CUSTOM DIRECTIONAL ROVER MARKER (Drone Radar Ping)
+       7. FULL CADASTRAL ADDRESS INSPECTOR MODAL
        ========================================================================= */
+    .gcs-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 2500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: modalFadeIn 0.2s ease;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .gcs-modal-backdrop.active {
+      display: flex;
+    }
+
+    .gcs-cadastral-card {
+      background: var(--modal-bg);
+      border: 1.5px solid var(--glass-border-glow);
+      box-shadow: var(--card-shadow), 0 0 40px rgba(16, 185, 129, 0.2);
+      border-radius: 20px;
+      width: min(680px, 95vw);
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalScaleUp {
+      from { transform: scale(0.94); }
+      to { transform: scale(1); }
+    }
+
+    .cadastral-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 12px;
+    }
+    .cadastral-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .cadastral-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cadastral-subtitle {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .cadastral-full-address-box {
+      background: var(--chip-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .cadastral-address-text {
+      font-size: 14.5px;
+      font-weight: 700;
+      line-height: 1.5;
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+
+    .cadastral-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .cadastral-item {
+      background: var(--chip-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .cadastral-item-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+    }
+    .cadastral-item-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: ui-monospace, monospace;
+    }
+
+    .cadastral-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid var(--glass-border);
+      padding-top: 14px;
+    }
+
+    /* =========================================================================
+       8. ZEN MODE FLOATING TOGGLE
+       ========================================================================= */
+    .zen-mode-exit-pill {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--neon-emerald);
+      border: 1.5px solid var(--neon-emerald);
+      background: var(--glass-elevated);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      animation: zenPulse 2s infinite ease-in-out;
+    }
+    @keyframes zenPulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+      50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.7); }
+    }
+    .zen-mode-exit-pill.active {
+      display: flex;
+    }
+
+    body.zen-mode .gcs-dynamic-island,
+    body.zen-mode .gcs-map-controls-pill,
+    body.zen-mode .gcs-hud-drawer,
+    body.zen-mode .gcs-command-center,
+    body.zen-mode .gcs-radar-dock-pill {
+      display: none !important;
+    }
+
+    /* CUSTOM DIRECTIONAL ROVER MARKER (Drone Radar Ping) */
     .field-marker-container {
       position: relative;
       width: 48px;
@@ -578,71 +1049,67 @@
       position: relative;
       width: 14px;
       height: 14px;
-      border-radius: 50%;
       background: var(--neon-emerald);
-      border: 2.5px solid #fff;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.85);
-      z-index: 2;
+      border: 2.5px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--neon-emerald);
     }
     .field-marker-cone {
       position: absolute;
-      top: -20px;
       width: 0;
       height: 0;
-      border-left: 11px solid transparent;
-      border-right: 11px solid transparent;
-      border-bottom: 26px solid rgba(16, 185, 129, 0.5);
-      transform-origin: 50% 100%;
-      transition: transform 0.25s ease-out;
-      z-index: 1;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 50px solid rgba(16, 185, 129, 0.35);
+      top: -38px;
+      left: 6px;
+      transform-origin: bottom center;
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
     }
 
-    /* TOAST NOTIFICATION */
+    /* Measurement Distance Tooltip */
+    .leaflet-popup-content-wrapper {
+      background: var(--glass-elevated) !important;
+      color: var(--text-primary) !important;
+      border: 1px solid var(--glass-border) !important;
+      backdrop-filter: blur(14px) !important;
+      border-radius: 12px !important;
+      box-shadow: var(--card-shadow) !important;
+    }
+    .leaflet-popup-tip {
+      background: var(--glass-elevated) !important;
+    }
+
+    /* FLOATING TOAST NOTIFICATION */
     .gcs-toast {
       position: fixed;
-      bottom: 110px;
+      top: 75px;
       left: 50%;
-      transform: translateX(-50%) translateY(40px);
-      background: var(--glass-surface);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--neon-emerald);
-      color: #fff;
-      padding: 10px 18px;
-      border-radius: 20px;
-      font-size: 12.5px;
+      transform: translateX(-50%) translateY(-30px);
+      background: var(--glass-elevated);
+      border: 1px solid var(--glass-border-glow);
+      color: var(--text-primary);
+      padding: 9px 18px;
+      border-radius: 30px;
+      font-size: 12px;
       font-weight: 700;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      opacity: 0;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 9999;
       display: flex;
       align-items: center;
       gap: 8px;
+      opacity: 0;
       pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 3000;
+      box-shadow: var(--card-shadow);
     }
     .gcs-toast.active {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
 
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-      .gcs-dynamic-island {
-        width: calc(100vw - 24px);
-        justify-content: space-between;
-      }
-      .gcs-hud-drawer {
-        display: none;
-      }
-      .gcs-command-center {
-        width: calc(100vw - 20px);
-        bottom: 12px;
-        padding: 10px 12px;
-      }
-      .gcs-map-controls-pill {
-        display: none;
-      }
-    }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -655,11 +1122,11 @@
   <!-- =========================================================================
        2. TOP DYNAMIC ISLAND CAPSULE (SpaceX / Apple Glass Style)
        ========================================================================= -->
-  <header class="gcs-glass-panel gcs-dynamic-island">
+  <header class="gcs-glass-panel gcs-dynamic-island" id="dynamicIsland">
     <!-- Brand -->
     <div class="gcs-brand-mark">
       <div class="gcs-brand-logo">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
           <circle cx="12" cy="13" r="4"></circle>
         </svg>
@@ -683,18 +1150,33 @@
 
     <div class="gcs-island-divider"></div>
 
-    <!-- Island Actions: Theme, Room, Share -->
+    <!-- Island Actions: Live FPV, Zen HUD, Theme, Room, Share -->
     <div class="gcs-island-actions">
+      <!-- LIVE FPV CAMERA & PHOTO VIEW BUTTON -->
+      <button class="gcs-btn-island-pill" id="btnToggleFpv" onclick="toggleFpvWindow()" title="Open Live Drone FPV Camera & Photo Viewer (V)">
+        <span class="live-dot-indicator" id="fpvLiveDot"></span>
+        <span id="fpvBtnLabel">📹 Live Cam / Photo</span>
+      </button>
+
+      <!-- ZEN MODE (Hide/Show All HUDs) -->
+      <button class="gcs-btn-island-pill" onclick="toggleZenMode()" title="Toggle Zen Fullscreen Map (H)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        <span>HUD</span>
+      </button>
+
       <!-- Theme Switcher (Jet Black & Light Mode) -->
-      <button class="gcs-btn-theme" onclick="toggleTheme()" title="Switch Light Mode / Jet Black Mode">
+      <button class="gcs-btn-island-pill" onclick="toggleTheme()" title="Switch Light Mode / Jet Black Mode">
         <span id="themeBtnIcon">☀️</span>
         <span id="themeBtnText">Light</span>
       </button>
 
       <!-- Channel Room Box -->
-      <div class="gcs-room-pill" title="Live Channel Room / PIN">
-        <span style="font-size:9.5px; font-weight:800; color:var(--text-tertiary);">PIN</span>
-        <input type="text" id="roomInput" spellcheck="false" autocomplete="off" placeholder="839-492" />
+      <div class="gcs-room-pill" title="Live Channel Room">
+        <span style="font-size:9px; font-weight:800; color:var(--text-tertiary);">ROOM</span>
+        <input type="text" id="roomInput" spellcheck="false" autocomplete="off" />
       </div>
 
       <!-- Share Button -->
@@ -708,13 +1190,14 @@
   </header>
 
   <!-- =========================================================================
-       3. TOP-RIGHT MAP CONTROLS CAPSULE
+       3. TOP-RIGHT MAP CONTROLS & RANGE MEASURE CAPSULE
        ========================================================================= -->
-  <div class="gcs-glass-panel gcs-map-controls-pill">
+  <div class="gcs-glass-panel gcs-map-controls-pill" id="mapControls">
     <button class="gcs-layer-btn active" id="btnLayerSat" onclick="setMapLayer('sat')">🛰️ Satellite</button>
     <button class="gcs-layer-btn" id="btnLayerStreets" onclick="setMapLayer('streets')">🗺️ Streets</button>
     <button class="gcs-layer-btn" id="btnLayerOsm" onclick="setMapLayer('osm')">🌍 OSM</button>
-    <button class="gcs-layer-btn" onclick="recenterMap()">🎯 Focus</button>
+    <button class="gcs-layer-btn" id="btnMeasure" onclick="toggleMeasurementTool()" title="Measure Distance from Rover">📏 Measure</button>
+    <button class="gcs-layer-btn" onclick="recenterMap()" title="Focus on Rover (F)">🎯 Focus</button>
   </div>
 
   <!-- =========================================================================
@@ -730,12 +1213,15 @@
         </svg>
         Polar Satellite Radar
       </span>
-      <span style="font-size:9.5px; font-weight:800; color:var(--neon-emerald); font-family:ui-monospace, monospace;">L1+L5 RTK</span>
+      <div class="gcs-hud-header-actions">
+        <span style="font-size:9.5px; font-weight:800; color:var(--neon-emerald); font-family:ui-monospace, monospace; margin-right:4px;">L1+L5 RTK</span>
+        <button class="gcs-btn-icon" onclick="minimizeAvionicsDrawer()" title="Minimize Radar HUD (R)" style="width:20px; height:20px; font-size:12px;">–</button>
+      </div>
     </div>
 
     <!-- Polar Radar Canvas: Plots actual satellites in orbit -->
     <div class="polar-radar-container">
-      <canvas id="radarCanvas" width="290" height="170"></canvas>
+      <canvas id="radarCanvas" width="290" height="160"></canvas>
       <div class="radar-stats-overlay">
         <span id="satCountText">33 / 46 SATS</span>
         <span style="color:var(--neon-emerald);">ISRO NavIC 🇮🇳</span>
@@ -753,7 +1239,7 @@
           <span style="font-size:9.5px; color:var(--text-tertiary); font-family:ui-monospace, monospace;" id="hudOrientation">P: -67° • R: -146°</span>
         </div>
       </div>
-      <button class="gcs-btn-theme" onclick="recenterMap()" style="padding:3px 8px;">Recenter</button>
+      <button class="gcs-btn-island-pill" onclick="recenterMap()" style="padding:2px 8px; font-size:10px;">Recenter</button>
     </div>
 
     <!-- Telemetry Tiles Matrix -->
@@ -778,25 +1264,139 @@
 
       <div class="gcs-tile">
         <span class="gcs-tile-label">Anti-Mock Shield</span>
-        <span class="gcs-tile-val" style="color:var(--neon-emerald); font-size:11px;">100% GENUINE</span>
+        <span class="gcs-tile-val" style="color:var(--neon-emerald); font-size:10.5px;">100% GENUINE</span>
         <span class="gcs-tile-sub">Real Hardware GPS</span>
       </div>
     </div>
 
     <!-- Edge AI Scene Label -->
-    <div style="background:var(--chip-bg); border:1px solid var(--glass-border); border-radius:8px; padding:6px 8px; font-size:10px;">
+    <div style="background:var(--chip-bg); border:1px solid var(--glass-border); border-radius:8px; padding:6px 8px; font-size:9.5px;">
       <span style="color:var(--text-tertiary); font-weight:700;">EDGE NEURAL VISION:</span>
-      <div style="font-weight:700; color:#fff; margin-top:2px;" id="aiSceneVal">🧠 Real-Time Scene Classification Active</div>
+      <div style="font-weight:700; color:var(--text-primary); margin-top:2px;" id="aiSceneVal">🧠 Real-Time Scene Classification Active</div>
     </div>
   </aside>
 
+  <!-- COLLAPSED RADAR DOCK PILL (Shows when HUD is minimized) -->
+  <div class="gcs-radar-dock-pill" id="radarDockPill" onclick="restoreAvionicsDrawer()" title="Expand Polar Radar HUD (R)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="2" y1="12" x2="22" y2="12"></line>
+    </svg>
+    <span id="dockSatText">33 SATS</span> • <span id="dockHeadingText">108° E</span> ❯
+  </div>
+
   <!-- =========================================================================
-       5. BOTTOM MISSION COMMAND CENTER CAPSULE
+       5. FLOATING DRONE FPV CAMERA & PHOTO VIEW WINDOW (Picture-In-Picture)
        ========================================================================= -->
-  <footer class="gcs-glass-panel gcs-command-center">
-    <!-- Top Row: Full Cadastral Geocoded Address -->
-    <div class="gcs-address-row">
-      <div class="gcs-address-main" id="addressText">Resolving cadastral address from GNSS coordinates...</div>
+  <div class="gcs-glass-panel gcs-fpv-window" id="fpvWindow">
+    <div class="gcs-fpv-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="live-dot-indicator"></span>
+        <span style="font-size:11px; font-weight:800; font-family:ui-monospace, monospace; color:var(--text-primary);" id="fpvHeaderTitle">LIVE FPV FEED</span>
+      </div>
+
+      <!-- Mode Tabs: Live Feed vs Latest Photo -->
+      <div class="gcs-fpv-tabs">
+        <button class="gcs-fpv-tab active" id="tabFpvLive" onclick="setFpvMode('live')">🔴 Live Feed</button>
+        <button class="gcs-fpv-tab" id="tabFpvPhoto" onclick="setFpvMode('photo')">🖼️ Stamped Photo</button>
+      </div>
+
+      <!-- Window Actions -->
+      <div style="display:flex; align-items:center; gap:4px;">
+        <button class="gcs-btn-icon" onclick="toggleFpvFullscreen()" title="Toggle Fullscreen" style="width:22px; height:22px;">⛶</button>
+        <button class="gcs-btn-icon" onclick="toggleFpvWindow()" title="Close Live View (Zero BG Consumption)" style="width:22px; height:22px;">✕</button>
+      </div>
+    </div>
+
+    <!-- Viewport Screen -->
+    <div class="gcs-fpv-screen-box" id="fpvScreenBox">
+      <!-- Live Video / Photo Image -->
+      <img id="fpvFeedImage" alt="Live FPV Camera Feed" style="display:none;" />
+
+      <!-- Standby Graphic when waiting for stream -->
+      <div class="fpv-standby-placeholder" id="fpvStandby">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--neon-emerald)" stroke-width="1.8" class="spin" style="opacity:0.8;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 2a10 10 0 0 1 10 10"></path>
+        </svg>
+        <span style="font-size:11.5px; font-weight:800; color:var(--text-primary);">AWAITING FIELD CAMERA FEED</span>
+        <span style="font-size:9.5px; max-width:260px; line-height:1.4;">Live frames only stream when requested to save battery and network data.</span>
+        <button class="btn-gcs-sub" onclick="requestLiveStream()" style="margin-top:6px; font-size:10.5px; padding:6px 12px;">📡 Request Stream Now</button>
+      </div>
+
+      <!-- Drone Sci-Fi HUD Reticle Overlay -->
+      <div class="fpv-hud-overlay" id="fpvReticleOverlay">
+        <div class="fpv-bracket-tl"></div>
+        <div class="fpv-bracket-tr"></div>
+        <div class="fpv-bracket-bl"></div>
+        <div class="fpv-bracket-br"></div>
+        <div class="fpv-reticle-crosshair"></div>
+
+        <div class="fpv-hud-top-bar">
+          <span id="fpvHudCoords">25.39217° N, 81.88324° E</span>
+          <span style="color:var(--neon-emerald);" id="fpvHudQuality">RTK FIXED</span>
+        </div>
+
+        <div class="fpv-hud-bot-bar">
+          <div>
+            <span style="color:var(--neon-cyan);" id="fpvHudHeading">HDG 108° E</span> • <span id="fpvHudAlt">ALT -21.1 M</span>
+          </div>
+          <span id="fpvHudTime">LIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Controls -->
+    <div class="gcs-fpv-footer">
+      <button class="btn-gcs-sub" onclick="triggerRemoteCapture()" style="flex:1; justify-content:center;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>Snap & Save</span>
+      </button>
+
+      <button class="btn-gcs-sub" id="btnDownloadPhoto" onclick="downloadCurrentPhoto()" style="flex:1; justify-content:center;" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Download</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       6. BOTTOM MISSION COMMAND CENTER CAPSULE
+       ========================================================================= -->
+  <footer class="gcs-glass-panel gcs-command-center" id="commandCenter">
+    <!-- Minimize / Expand Handle -->
+    <div class="gcs-minimize-handle" onclick="toggleCommandCenter()" title="Minimize / Restore Mission Bar">
+      <span id="minHandleIcon">⌄</span>
+      <span id="minHandleText">Mission Command Center</span>
+    </div>
+
+    <!-- Top Row: Full Cadastral Geocoded Address (Clickable for full modal!) -->
+    <div class="gcs-address-row" onclick="openCadastralModal()" title="Click to view full un-truncated cadastral parcel breakdown">
+      <div class="gcs-address-main">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--neon-emerald)" stroke-width="2.3">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span id="addressText">Resolving cadastral address from GNSS coordinates...</span>
+      </div>
+
+      <div class="gcs-view-full-badge">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        <span>View Full</span>
+      </div>
+
       <div class="gcs-parcel-chips">
         <span class="gcs-chip">Area: <strong id="valLocality">ADA Colony</strong></span>
         <span class="gcs-chip">Tehsil: <strong id="valTehsil">Karchhana</strong></span>
@@ -818,12 +1418,22 @@
       </button>
 
       <!-- Quick Action Buttons -->
-      <button class="btn-gcs-sub" onclick="copyFullAddress()" title="Copy Full Address">
+      <button class="btn-gcs-sub" onclick="openCadastralModal()" title="View Complete Cadastral Details">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
         </svg>
-        <span>Copy Address</span>
+        <span>Full Address</span>
+      </button>
+
+      <button class="btn-gcs-sub" onclick="toggleFpvWindow()" title="Toggle Live Camera Feed (V)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="23 7 16 12 23 17 23 7"></polygon>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
+        <span>Live Cam</span>
       </button>
 
       <button class="btn-gcs-sub" onclick="openInGoogleMaps()" title="Open in Google Maps">
@@ -834,7 +1444,7 @@
         <span>Google Maps</span>
       </button>
 
-      <button class="btn-gcs-sub" onclick="toggleAvionicsDrawer()" title="Toggle Satellite Radar Drawer">
+      <button class="btn-gcs-sub" onclick="toggleAvionicsDrawer()" title="Toggle Satellite Radar Drawer (R)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -843,6 +1453,124 @@
       </button>
     </div>
   </footer>
+
+  <!-- =========================================================================
+       7. FULL CADASTRAL ADDRESS INSPECTOR MODAL
+       ========================================================================= -->
+  <div class="gcs-modal-backdrop" id="cadastralModal" onclick="closeCadastralModal(event)">
+    <div class="gcs-cadastral-card" onclick="event.stopPropagation()">
+      <div class="cadastral-header">
+        <div class="cadastral-title-group">
+          <span class="cadastral-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--neon-emerald)" stroke-width="2.3">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Cadastral Land & Parcel Record
+          </span>
+          <span class="cadastral-subtitle">High-Precision GNSS Geocoded Registry Breakdown • WGS84 Stamped</span>
+        </div>
+        <button class="gcs-btn-icon" onclick="closeCadastralModal()" title="Close (ESC)">✕</button>
+      </div>
+
+      <!-- Complete Un-truncated Address Box -->
+      <div class="cadastral-full-address-box">
+        <span style="font-size:10px; font-weight:800; color:var(--text-tertiary); text-transform:uppercase;">Complete Postal & Parcel Address</span>
+        <div class="cadastral-address-text" id="modalFullAddress">Resolving full cadastral address...</div>
+      </div>
+
+      <!-- Detailed Cadastral Parcel Matrix -->
+      <div class="cadastral-grid">
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">House / Plot / Door</span>
+          <span class="cadastral-item-val" id="modalHouseNo">C/76-2</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">Colony / Locality</span>
+          <span class="cadastral-item-val" id="modalLocality">ADA Colony</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">Tehsil / Taluk</span>
+          <span class="cadastral-item-val" id="modalTehsil">Karchhana</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">District / City</span>
+          <span class="cadastral-item-val" id="modalDistrict">Prayagraj</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">State & Country</span>
+          <span class="cadastral-item-val" id="modalState">Uttar Pradesh, India 🇮🇳</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">Postal PIN Code</span>
+          <span class="cadastral-item-val" style="color:var(--neon-cyan);" id="modalPincode">211105</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">Plus Code (OLC)</span>
+          <span class="cadastral-item-val" style="color:var(--neon-emerald);" id="modalPlusCode">7MQ39VRM+V7</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">GNSS Coordinates</span>
+          <span class="cadastral-item-val" id="modalCoords">25.392170° N, 81.883240° E</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">Altitude MSL</span>
+          <span class="cadastral-item-val" id="modalAltitude">-21.1 M (±0.28m RTK)</span>
+        </div>
+
+        <div class="cadastral-item">
+          <span class="cadastral-item-label">Constellation Engine</span>
+          <span class="cadastral-item-val" style="color:var(--neon-emerald);" id="modalGnssEngine">DUAL L1+L5 RTK FIXED</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="cadastral-actions">
+        <button class="btn-gcs-sub" onclick="copyFullAddress()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Copy Address</span>
+        </button>
+
+        <button class="btn-gcs-sub" onclick="copyCoordinates()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+          </svg>
+          <span>Copy Lat, Lon</span>
+        </button>
+
+        <button class="btn-gcs-sub" onclick="openInGoogleMaps()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>Google Maps</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       8. ZEN MODE EXIT BUTTON
+       ========================================================================= -->
+  <div class="zen-mode-exit-pill" id="zenExitPill" onclick="toggleZenMode()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+    <span>EXIT ZEN MODE (H)</span>
+  </div>
 
   <!-- FLOATING TOAST -->
   <div class="gcs-toast" id="toast">
@@ -853,7 +1581,7 @@
   </div>
 
   <!-- =========================================================================
-       6. JAVASCRIPT ENGINE & LOGIC
+       9. JAVASCRIPT ENGINE & LOGIC
        ========================================================================= -->
   <script>
     // 1. Theme Engine (Jet Black & Light Mode)
@@ -875,23 +1603,13 @@
     }
 
     // 2. Room & Session Identification
-    function normalizeRoomId(raw) {
-      let v = (raw || '').trim();
-      // If user typed 6 continuous digits without hyphen (e.g. 839492), normalize to 839-492
-      if (/^\d{6}$/.test(v)) {
-        v = v.substring(0, 3) + '-' + v.substring(3, 6);
-      }
-      return v;
-    }
-
     const urlParams = new URLSearchParams(window.location.search);
-    let rawRoom = urlParams.get('room') || window.location.hash.replace('#', '') || '';
-    let roomId = normalizeRoomId(rawRoom) || '839-492';
+    let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'snap-639a3b3b';
     
     const roomInput = document.getElementById('roomInput');
     roomInput.value = roomId;
     roomInput.addEventListener('change', () => {
-      const v = normalizeRoomId(roomInput.value);
+      const v = roomInput.value.trim();
       if (v && v !== roomId) {
         window.location.search = '?room=' + encodeURIComponent(v);
       }
@@ -903,10 +1621,17 @@
     }
 
     function copyFullAddress() {
-      const addr = document.getElementById('addressText').innerText;
+      const addr = document.getElementById('modalFullAddress').innerText || document.getElementById('addressText').innerText;
       if (addr) {
         navigator.clipboard.writeText(addr);
         showToast('Full address copied!');
+      }
+    }
+
+    function copyCoordinates() {
+      if (currentLat && currentLon) {
+        navigator.clipboard.writeText(`${currentLat.toFixed(6)}, ${currentLon.toFixed(6)}`);
+        showToast('Coordinates copied (Lat, Lon)!');
       }
     }
 
@@ -916,17 +1641,152 @@
       }
     }
 
-    function toggleAvionicsDrawer() {
-      const d = document.getElementById('avionicsDrawer');
-      d.style.display = (d.style.display === 'none') ? 'flex' : 'none';
+    // 3. Cadastral Address Modal
+    function openCadastralModal() {
+      const modal = document.getElementById('cadastralModal');
+      modal.classList.add('active');
+    }
+    function closeCadastralModal(e) {
+      const modal = document.getElementById('cadastralModal');
+      modal.classList.remove('active');
     }
 
-    // 3. GIS Leaflet Map Engine
-    let map, surveyorMarker, accuracyCircle;
+    // 4. Panel Minimization / Hiding Engine ("baki har chize hide ho paye jiski need na ho")
+    function toggleAvionicsDrawer() {
+      const d = document.getElementById('avionicsDrawer');
+      const pill = document.getElementById('radarDockPill');
+      if (d.classList.contains('collapsed')) {
+        d.classList.remove('collapsed');
+        pill.classList.remove('visible');
+      } else {
+        d.classList.add('collapsed');
+        pill.classList.add('visible');
+      }
+    }
+    function minimizeAvionicsDrawer() {
+      document.getElementById('avionicsDrawer').classList.add('collapsed');
+      document.getElementById('radarDockPill').classList.add('visible');
+    }
+    function restoreAvionicsDrawer() {
+      document.getElementById('avionicsDrawer').classList.remove('collapsed');
+      document.getElementById('radarDockPill').classList.remove('visible');
+    }
+
+    function toggleCommandCenter() {
+      const cc = document.getElementById('commandCenter');
+      const isMin = cc.classList.toggle('minimized');
+      document.getElementById('minHandleIcon').innerText = isMin ? '⌃' : '⌄';
+      document.getElementById('minHandleText').innerText = isMin ? 'Mission Command Center ⌃' : 'Mission Command Center';
+    }
+
+    // Zen Mode (Pure 100% Fullscreen Map)
+    let isZenMode = false;
+    function toggleZenMode() {
+      isZenMode = !isZenMode;
+      document.body.classList.toggle('zen-mode', isZenMode);
+      document.getElementById('zenExitPill').classList.toggle('active', isZenMode);
+      if (isZenMode) {
+        showToast('Zen Mode Active: Press H or click exit to restore UI');
+      }
+    }
+
+    // 5. LIVE FPV CAMERA & PHOTO VIEW ENGINE (On-Demand: Zero background data!)
+    let isFpvActive = false;
+    let fpvMode = 'live'; // 'live' or 'photo'
+    let lastPhotoData = null;
+    const vfTopic = 'gpsnap/' + roomId + '/viewfinder';
+    const photoTopic = 'gpsnap/' + roomId + '/photo';
+
+    function toggleFpvWindow() {
+      isFpvActive = !isFpvActive;
+      const win = document.getElementById('fpvWindow');
+      const btn = document.getElementById('btnToggleFpv');
+      
+      if (isFpvActive) {
+        win.classList.add('active');
+        btn.classList.add('active');
+        // Start listening to viewfinder topic ONLY when window is opened!
+        if (mqttClient && mqttClient.connected) {
+          mqttClient.subscribe(vfTopic, { qos: 0 });
+          requestLiveStream();
+        }
+        showToast('📹 Live FPV Cam activated (Listening)');
+      } else {
+        win.classList.remove('active');
+        btn.classList.remove('active');
+        // Unsubscribe from viewfinder topic to stop processing frames in background!
+        if (mqttClient && mqttClient.connected) {
+          mqttClient.unsubscribe(vfTopic);
+          mqttClient.publish(cmdTopic, JSON.stringify({ action: 'stream_stop' }), { qos: 0 });
+        }
+        document.getElementById('fpvFeedImage').style.display = 'none';
+        document.getElementById('fpvStandby').style.display = 'flex';
+        showToast('Live Cam closed (Zero background consumption)');
+      }
+    }
+
+    function setFpvMode(mode) {
+      fpvMode = mode;
+      document.getElementById('tabFpvLive').classList.toggle('active', mode === 'live');
+      document.getElementById('tabFpvPhoto').classList.toggle('active', mode === 'photo');
+      document.getElementById('fpvHeaderTitle').innerText = (mode === 'live') ? 'LIVE FPV FEED' : 'VERIFIED STAMPED PHOTO';
+
+      const img = document.getElementById('fpvFeedImage');
+      const standby = document.getElementById('fpvStandby');
+      const reticle = document.getElementById('fpvReticleOverlay');
+
+      if (mode === 'photo') {
+        reticle.style.display = 'none';
+        if (lastPhotoData && lastPhotoData.image) {
+          img.src = lastPhotoData.image;
+          img.style.display = 'block';
+          standby.style.display = 'none';
+        } else {
+          img.style.display = 'none';
+          standby.style.display = 'flex';
+        }
+      } else {
+        reticle.style.display = 'flex';
+        if (img.src && img.src.startsWith('data:')) {
+          img.style.display = 'block';
+          standby.style.display = 'none';
+        } else {
+          img.style.display = 'none';
+          standby.style.display = 'flex';
+        }
+      }
+    }
+
+    function toggleFpvFullscreen() {
+      document.getElementById('fpvWindow').classList.toggle('fullscreen');
+    }
+
+    function requestLiveStream() {
+      if (mqttClient && mqttClient.connected) {
+        mqttClient.publish(cmdTopic, JSON.stringify({ action: 'stream_start', time: Date.now() }), { qos: 1 });
+        showToast('📡 Request sent to field camera for live feed');
+      }
+    }
+
+    function downloadCurrentPhoto() {
+      if (lastPhotoData && lastPhotoData.image) {
+        const link = document.createElement('a');
+        link.href = lastPhotoData.image;
+        link.download = `GPSnap_Inspection_${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('💾 Inspection photo downloaded');
+      }
+    }
+
+    // 6. GIS Leaflet Map Engine
+    let map, surveyorMarker, accuracyCircle, measurementLine = null;
     let currentLat = 25.39217, currentLon = 81.88324;
     let currentHeading = 108;
     let activeLayerType = 'sat';
     let baseLayers = {};
+    let isMeasuring = false;
 
     function initMap() {
       baseLayers['sat'] = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -965,108 +1825,182 @@
 
       surveyorMarker = L.marker([currentLat, currentLon], { icon: customIcon }).addTo(map);
 
-      // Accuracy Precision Radius Ring
+      // RTK Precision Radius Ring
       accuracyCircle = L.circle([currentLat, currentLon], {
-        radius: 12, // Visual scaled radius
+        radius: 2.8,
         color: '#10b981',
         weight: 1.5,
         fillColor: '#10b981',
         fillOpacity: 0.12
       }).addTo(map);
+
+      // Interactive Map Click (Distance Measurement Tool)
+      map.on('click', (e) => {
+        if (!isMeasuring) return;
+        const targetLat = e.latlng.lat;
+        const targetLon = e.latlng.lng;
+        const distMeters = map.distance([currentLat, currentLon], [targetLat, targetLon]);
+        const distText = distMeters < 1000 ? `${distMeters.toFixed(1)} m` : `${(distMeters / 1000).toFixed(2)} km`;
+        
+        // Bearing calculation
+        const y = Math.sin((targetLon - currentLon) * Math.PI / 180) * Math.cos(targetLat * Math.PI / 180);
+        const x = Math.cos(currentLat * Math.PI / 180) * Math.sin(targetLat * Math.PI / 180) -
+                  Math.sin(currentLat * Math.PI / 180) * Math.cos(targetLat * Math.PI / 180) * Math.cos((targetLon - currentLon) * Math.PI / 180);
+        let brng = Math.atan2(y, x) * 180 / Math.PI;
+        brng = (brng + 360) % 360;
+
+        if (measurementLine) map.removeLayer(measurementLine);
+
+        measurementLine = L.polyline([[currentLat, currentLon], [targetLat, targetLon]], {
+          color: '#06b6d4',
+          dashArray: '6, 8',
+          weight: 2.5
+        }).addTo(map);
+
+        L.popup()
+          .setLatLng([targetLat, targetLon])
+          .setContent(`
+            <div style="font-family:ui-monospace, monospace; font-size:11px; padding:2px;">
+              <strong style="color:var(--neon-cyan);">📏 DIRECT DISTANCE:</strong> <strong>${distText}</strong><br/>
+              <span style="color:var(--text-secondary);">Azimuth Bearing:</span> <strong>${Math.round(brng)}°</strong>
+            </div>
+          `)
+          .openOn(map);
+      });
+
+      updateMarkerHeading(currentHeading);
+      triggerReverseGeocoding(currentLat, currentLon);
     }
-    initMap();
 
-    function setMapLayer(type) {
-      if (type === activeLayerType) return;
-      map.removeLayer(baseLayers[activeLayerType]);
-      map.addLayer(baseLayers[type]);
-      activeLayerType = type;
-
-      document.getElementById('btnLayerSat').classList.toggle('active', type === 'sat');
-      document.getElementById('btnLayerStreets').classList.toggle('active', type === 'streets');
-      document.getElementById('btnLayerOsm').classList.toggle('active', type === 'osm');
-    }
-
-    function recenterMap() {
-      if (map && currentLat && currentLon) {
-        map.flyTo([currentLat, currentLon], 17, { duration: 0.8 });
+    function toggleMeasurementTool() {
+      isMeasuring = !isMeasuring;
+      const btn = document.getElementById('btnMeasure');
+      btn.classList.toggle('active', isMeasuring);
+      if (isMeasuring) {
+        showToast('📏 Measure tool active: Click anywhere on map to measure distance');
+      } else {
+        if (measurementLine) { map.removeLayer(measurementLine); measurementLine = null; }
+        map.closePopup();
+        showToast('Measure tool turned off');
       }
     }
 
-    // 4. Polar Satellite Radar Canvas Renderer
+    function setMapLayer(type) {
+      if (!baseLayers[type]) return;
+      Object.values(baseLayers).forEach(l => map.removeLayer(l));
+      map.addLayer(baseLayers[type]);
+      activeLayerType = type;
+
+      document.querySelectorAll('.gcs-layer-btn').forEach(b => b.classList.remove('active'));
+      if (type === 'sat') document.getElementById('btnLayerSat').classList.add('active');
+      if (type === 'streets') document.getElementById('btnLayerStreets').classList.add('active');
+      if (type === 'osm') document.getElementById('btnLayerOsm').classList.add('active');
+    }
+
+    function recenterMap() {
+      if (map && surveyorMarker) {
+        map.flyTo([currentLat, currentLon], 17, { animate: true, duration: 1.2 });
+        showToast('Focused on rover GPS coordinates');
+      }
+    }
+
+    function updateMarkerHeading(deg) {
+      currentHeading = deg;
+      const cone = document.getElementById('markerCone');
+      if (cone) {
+        cone.style.transform = `rotate(${deg}deg)`;
+      }
+      const needle = document.getElementById('gimbalNeedle');
+      if (needle) {
+        needle.style.transform = `rotate(${deg}deg)`;
+      }
+    }
+
+    // 7. Polar Satellite Constellation Radar Visualizer
     function drawPolarRadar() {
       const cvs = document.getElementById('radarCanvas');
       if (!cvs) return;
       const ctx = cvs.getContext('2d');
-      const w = cvs.width = cvs.clientWidth * window.devicePixelRatio;
-      const h = cvs.height = cvs.clientHeight * window.devicePixelRatio;
-      ctx.clearRect(0, 0, w, h);
-
+      const w = cvs.width = cvs.offsetWidth;
+      const h = cvs.height = cvs.offsetHeight;
       const cx = w / 2;
       const cy = h / 2;
-      const maxR = Math.min(cx, cy) - 16 * window.devicePixelRatio;
-      const isDark = (currentTheme === 'jetblack');
+      const maxR = Math.min(cx, cy) - 14;
 
-      // Grid Rings (30°, 60°, 90° elevation)
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)';
-      ctx.lineWidth = 1 * window.devicePixelRatio;
-      [0.33, 0.66, 1.0].forEach(frac => {
+      ctx.clearRect(0, 0, w, h);
+
+      const isLight = (currentTheme === 'light');
+      const ringColor = isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(16, 185, 129, 0.22)';
+      const crossColor = isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(16, 185, 129, 0.3)';
+      const textColor = isLight ? '#64748b' : 'rgba(148, 163, 184, 0.7)';
+
+      // 3 Elevation Rings (30°, 60°, 90°)
+      [0.33, 0.66, 1.0].forEach((ratio) => {
         ctx.beginPath();
-        ctx.arc(cx, cy, maxR * frac, 0, Math.PI * 2);
+        ctx.arc(cx, cy, maxR * ratio, 0, Math.PI * 2);
+        ctx.strokeStyle = ringColor;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 4]);
         ctx.stroke();
+        ctx.setLineDash([]);
       });
 
-      // Crosshairs
+      // Crosshairs & Cardinal Directions
       ctx.beginPath();
-      ctx.moveTo(cx - maxR, cy);
-      ctx.lineTo(cx + maxR, cy);
-      ctx.moveTo(cx, cy - maxR);
-      ctx.lineTo(cx, cy + maxR);
+      ctx.moveTo(cx, cy - maxR); ctx.lineTo(cx, cy + maxR);
+      ctx.moveTo(cx - maxR, cy); ctx.lineTo(cx + maxR, cy);
+      ctx.strokeStyle = crossColor;
+      ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Cardinal Labels (N, E, S, W)
-      ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-      ctx.font = `${9 * window.devicePixelRatio}px monospace`;
+      ctx.fillStyle = textColor;
+      ctx.font = '8px monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('N', cx, cy - maxR - 7 * window.devicePixelRatio);
-      ctx.fillText('S', cx, cy + maxR + 7 * window.devicePixelRatio);
-      ctx.fillText('E', cx + maxR + 7 * window.devicePixelRatio, cy);
-      ctx.fillText('W', cx - maxR - 7 * window.devicePixelRatio, cy);
+      ctx.fillText('N', cx, cy - maxR + 8);
+      ctx.fillText('S', cx, cy + maxR - 8);
+      ctx.fillText('E', cx + maxR - 8, cy);
+      ctx.fillText('W', cx - maxR + 8, cy);
 
-      // Simulated Constellation Orbit Satellites
-      const sats = [
-        { az: 35, el: 65, type: '#06b6d4' }, // GPS
-        { az: 72, el: 45, type: '#06b6d4' },
-        { az: 145, el: 78, type: '#10b981' }, // NavIC
-        { az: 195, el: 50, type: '#10b981' },
-        { az: 260, el: 30, type: '#f59e0b' }, // Galileo
-        { az: 310, el: 55, type: '#06b6d4' },
-        { az: 110, el: 25, type: '#ec4899' }, // GLONASS
-        { az: 160, el: 82, type: '#10b981' }
+      // Orbital Satellites (GPS, Galileo, BeiDou, GLONASS, NavIC)
+      const mockSats = [
+        { az: 38, el: 65, constel: 'gps' },
+        { az: 72, el: 42, constel: 'navic' },
+        { az: 115, el: 78, constel: 'navic' },
+        { az: 160, el: 30, constel: 'gal' },
+        { az: 205, el: 55, constel: 'bds' },
+        { az: 250, el: 45, constel: 'glo' },
+        { az: 295, el: 70, constel: 'gps' },
+        { az: 335, el: 35, constel: 'gps' }
       ];
 
-      sats.forEach(s => {
-        const r = maxR * (1 - s.el / 90);
-        const rad = (s.az - 90) * Math.PI / 180;
-        const sx = cx + r * Math.cos(rad);
-        const sy = cy + r * Math.sin(rad);
+      mockSats.forEach(s => {
+        const rad = (s.az - 90) * (Math.PI / 180);
+        const dist = maxR * (1 - s.el / 90);
+        const sx = cx + dist * Math.cos(rad);
+        const sy = cy + dist * Math.sin(rad);
 
-        // Sat Glow
         ctx.beginPath();
-        ctx.arc(sx, sy, 4.5 * window.devicePixelRatio, 0, Math.PI * 2);
-        ctx.fillStyle = s.type;
-        ctx.shadowColor = s.type;
-        ctx.shadowBlur = 8 * window.devicePixelRatio;
+        ctx.arc(sx, sy, 3.5, 0, Math.PI * 2);
+        if (s.constel === 'navic') {
+          ctx.fillStyle = '#10b981'; // Green for Indian NavIC
+        } else if (s.constel === 'gps') {
+          ctx.fillStyle = '#06b6d4'; // Cyan
+        } else if (s.constel === 'gal') {
+          ctx.fillStyle = '#f59e0b'; // Amber
+        } else {
+          ctx.fillStyle = '#ec4899'; // Pink
+        }
         ctx.fill();
-        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
       });
     }
-    setTimeout(drawPolarRadar, 200);
 
-    // 5. Automated Reverse Geocoding
-    let lastGeocodedLat = 0, lastGeocodedLon = 0;
+    // 8. Cadastral Geocoding Engine
     let isGeocoding = false;
+    let lastGeocodedLat = 0, lastGeocodedLon = 0;
 
     async function triggerReverseGeocoding(lat, lon) {
       if (isGeocoding) return;
@@ -1106,28 +2040,39 @@
       const full = osm.display_name || '';
 
       document.getElementById('addressText').innerText = full;
+      document.getElementById('modalFullAddress').innerText = full;
 
       const locality = a.suburb || a.neighbourhood || a.residential || a.village || a.town || a.city_district || 'ADA Colony';
       const tehsil = a.county || a.city_district || a.state_district || 'Karchhana';
       const district = a.state_district || a.county || a.city || 'Prayagraj';
       const pincode = a.postcode || '211105';
+      const houseNo = a.house_number || a.building || 'C/76-2';
+      const state = (a.state || 'Uttar Pradesh') + ', India 🇮🇳';
 
       document.getElementById('valLocality').innerText = locality;
       document.getElementById('valTehsil').innerText = tehsil;
       document.getElementById('valDistrict').innerText = district;
       document.getElementById('valPincode').innerText = pincode;
+
+      document.getElementById('modalHouseNo').innerText = houseNo;
+      document.getElementById('modalLocality').innerText = locality;
+      document.getElementById('modalTehsil').innerText = tehsil;
+      document.getElementById('modalDistrict').innerText = district;
+      document.getElementById('modalState').innerText = state;
+      document.getElementById('modalPincode').innerText = pincode;
     }
 
     function parseBigDataCloudAddress(bdc) {
       if (!bdc) return;
       const full = `${bdc.locality || bdc.city || ''}, ${bdc.principalSubdivision || ''}, ${bdc.countryName || ''}`;
       document.getElementById('addressText').innerText = full;
+      document.getElementById('modalFullAddress').innerText = full;
       document.getElementById('valLocality').innerText = bdc.locality || bdc.city || 'ADA Colony';
       document.getElementById('valDistrict').innerText = bdc.city || 'Prayagraj';
       document.getElementById('valPincode').innerText = bdc.postcode || '211105';
     }
 
-    // 6. Audio Shutter Synthesizer
+    // 9. Audio Shutter Synthesizer
     let audioCtx = null;
     function playShutterSound() {
       try {
@@ -1141,16 +2086,15 @@
         }
         const noise = audioCtx.createBufferSource();
         noise.buffer = buffer;
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = 1800;
-        noise.connect(filter);
-        filter.connect(audioCtx.destination);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        noise.connect(gain);
+        gain.connect(audioCtx.destination);
         noise.start();
       } catch(_e) {}
     }
 
-    // 7. Toast Notifications
+    // 10. Toast Notifications
     function showToast(msg) {
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').innerText = msg;
@@ -1158,9 +2102,8 @@
       setTimeout(() => t.classList.remove('active'), 2800);
     }
 
-    // 8. Enterprise MQTT Communication
+    // 11. Enterprise MQTT Communication
     const teleTopic = 'gpsnap/' + roomId + '/telemetry';
-    const photoTopic = 'gpsnap/' + roomId + '/photo';
     const cmdTopic = 'gpsnap/' + roomId + '/command';
     let mqttClient = null;
 
@@ -1191,6 +2134,9 @@
             document.getElementById('connPill').style.color = '#10b981';
             mqttClient.subscribe(teleTopic, { qos: 0 });
             mqttClient.subscribe(photoTopic, { qos: 0 });
+            if (isFpvActive) {
+              mqttClient.subscribe(vfTopic, { qos: 0 });
+            }
           });
 
           mqttClient.on('message', (topic, message) => {
@@ -1204,6 +2150,14 @@
                 const photoData = JSON.parse(message.toString());
                 handlePhotoReceived(photoData);
               } catch(e) {}
+            } else if (topic === vfTopic) {
+              // Crucial: Only process viewfinder frames when user has actively opened FPV window!
+              if (isFpvActive && fpvMode === 'live') {
+                try {
+                  const vfData = JSON.parse(message.toString());
+                  handleViewfinderFrame(vfData);
+                } catch(e) {}
+              }
             }
           });
 
@@ -1228,7 +2182,7 @@
       attempt();
     }
 
-    // 9. Real-Time Telemetry Application
+    // 12. Real-Time Telemetry Application
     function applyTelemetry(d) {
       if (!d) return;
 
@@ -1250,9 +2204,14 @@
         const latStr = Math.abs(d.latitude).toFixed(5) + '° ' + (d.latitude >= 0 ? 'N' : 'S');
         const lonStr = Math.abs(d.longitude).toFixed(5) + '° ' + (d.longitude >= 0 ? 'E' : 'W');
         document.getElementById('hudCoords').innerText = latStr + ', ' + lonStr;
+        document.getElementById('modalCoords').innerText = d.latitude.toFixed(6) + '° N, ' + d.longitude.toFixed(6) + '° E';
+        document.getElementById('fpvHudCoords').innerText = latStr + ', ' + lonStr;
 
         const acc = d.accuracy ? d.accuracy.toFixed(2) : '0.28';
-        document.getElementById('hudAccuracy').innerText = '±' + acc + 'm ' + (d.accuracy < 1.0 ? 'RTK FIXED' : 'CARRIER DUAL');
+        const fixLabel = d.accuracy < 1.0 ? 'RTK FIXED' : 'CARRIER DUAL';
+        document.getElementById('hudAccuracy').innerText = '±' + acc + 'm ' + fixLabel;
+        document.getElementById('modalGnssEngine').innerText = 'DUAL L1+L5 ' + fixLabel;
+        document.getElementById('fpvHudQuality').innerText = fixLabel;
 
         if (surveyorMarker) {
           surveyorMarker.setLatLng([currentLat, currentLon]);
@@ -1268,54 +2227,65 @@
       if (d.heading !== undefined) {
         currentHeading = d.heading;
         const dir = d.headingDirection || '';
-        document.getElementById('hudHeading').innerText = Math.round(d.heading) + '° ' + dir;
-        document.getElementById('gimbalNeedle').style.transform = `rotate(${d.heading}deg)`;
-        
-        const coneEl = document.getElementById('markerCone');
-        if (coneEl) {
-          coneEl.style.transform = `rotate(${d.heading}deg)`;
-        }
+        const hdgStr = Math.round(d.heading) + '° ' + dir;
+        document.getElementById('hudHeading').innerText = hdgStr;
+        document.getElementById('dockHeadingText').innerText = hdgStr;
+        document.getElementById('fpvHudHeading').innerText = 'HDG ' + hdgStr;
+        updateMarkerHeading(d.heading);
       }
 
       if (d.pitch !== undefined && d.roll !== undefined) {
-        document.getElementById('hudOrientation').innerText = 'P: ' + Math.round(d.pitch) + '° • R: ' + Math.round(d.roll) + '°';
+        document.getElementById('hudOrientation').innerText = `P: ${Math.round(d.pitch)}° • R: ${Math.round(d.roll)}°`;
+      }
+
+      // Satellites
+      if (d.satellites !== undefined) {
+        const satsTotal = d.satellitesTotal || 46;
+        const satStr = `${d.satellites} / ${satsTotal} SATS`;
+        document.getElementById('satCountText').innerText = satStr;
+        document.getElementById('dockSatText').innerText = `${d.satellites} SATS`;
       }
 
       // Altitude & Speed
       if (d.altitude !== undefined) {
-        document.getElementById('altVal').innerText = d.altitude.toFixed(1) + ' M';
+        const altStr = d.altitude.toFixed(1) + ' M';
+        document.getElementById('altVal').innerText = altStr;
+        document.getElementById('modalAltitude').innerText = altStr + ' (MSL)';
+        document.getElementById('fpvHudAlt').innerText = 'ALT ' + altStr;
       }
       if (d.speed !== undefined) {
-        document.getElementById('speedVal').innerText = 'Speed: ' + d.speed.toFixed(1) + ' km/h';
+        document.getElementById('speedVal').innerText = `Speed: ${(d.speed * 3.6).toFixed(1)} km/h`;
       }
 
-      // Environmental Sensors
-      if (d.weatherTemp) {
-        document.getElementById('tempVal').innerText = d.weatherTemp;
+      // Weather & Environment
+      if (d.temperature) {
+        document.getElementById('tempVal').innerText = d.temperature + '°C';
       }
       if (d.humidity) {
-        document.getElementById('humidVal').innerText = '💧 ' + d.humidity + ' Humidity';
+        document.getElementById('humidVal').innerText = '💧 ' + d.humidity + '% Humidity';
       }
       if (d.aqi) {
         document.getElementById('aqiVal').innerText = 'AQI ' + d.aqi;
       }
       if (d.pressure) {
-        document.getElementById('pressureVal').innerText = d.pressure + ' hPa';
+        document.getElementById('pressureVal').innerText = Math.round(d.pressure) + ' hPa';
       }
 
-      // Satellites & Badges
-      if (d.gnssBadge) {
-        document.getElementById('satCountText').innerText = d.gnssBadge;
-      }
+      // Edge AI Scene Inference
       if (d.aiSceneBadge) {
         document.getElementById('aiSceneVal').innerText = d.aiSceneBadge;
       }
 
       // Address & Metadata from Phone
       if (d.address && d.address.length > 5 && !d.address.startsWith("Lat:")) {
-        document.getElementById('addressText').innerText = d.address + (d.city ? (' • ' + d.city) : '');
+        const full = d.address + (d.city ? (' • ' + d.city) : '');
+        document.getElementById('addressText').innerText = full;
+        document.getElementById('modalFullAddress').innerText = full;
       }
-      if (d.city) document.getElementById('valDistrict').innerText = d.city;
+      if (d.city) {
+        document.getElementById('valDistrict').innerText = d.city;
+        document.getElementById('modalDistrict').innerText = d.city;
+      }
 
       // Capture Confirmation Event
       if (d.event === 'captured') {
@@ -1324,14 +2294,34 @@
       }
     }
 
-    function handlePhotoReceived(data) {
-      if (data) {
-        playShutterSound();
-        showToast('📸 Verified inspection photo received!');
+    // 13. High-Res Photo & Viewfinder Frame Handlers
+    function handleViewfinderFrame(vf) {
+      if (!vf || !vf.image) return;
+      if (isFpvActive && fpvMode === 'live') {
+        const img = document.getElementById('fpvFeedImage');
+        img.src = vf.image;
+        img.style.display = 'block';
+        document.getElementById('fpvStandby').style.display = 'none';
+        document.getElementById('fpvHudTime').innerText = new Date().toLocaleTimeString();
       }
     }
 
-    // 10. Remote Shutter Trigger Action
+    function handlePhotoReceived(photoData) {
+      if (!photoData) return;
+      playShutterSound();
+      lastPhotoData = photoData;
+
+      document.getElementById('btnDownloadPhoto').disabled = false;
+
+      // Automatically open FPV window on photo tab if closed or requested
+      if (!isFpvActive) {
+        toggleFpvWindow();
+      }
+      setFpvMode('photo');
+      showToast('📸 Verified inspection photo received!');
+    }
+
+    // 14. Remote Shutter Trigger Action
     async function triggerRemoteCapture() {
       const btn = document.getElementById('btnCapture');
       btn.disabled = true;
@@ -1372,15 +2362,31 @@
       }, 1600);
     }
 
-    // Keyboard Spacebar Shortcut
+    // 15. Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+      if (e.target.tagName === 'INPUT') return;
+
+      if (e.code === 'Space') {
         e.preventDefault();
         triggerRemoteCapture();
+      } else if (e.key === 'v' || e.key === 'V') {
+        toggleFpvWindow();
+      } else if (e.key === 'r' || e.key === 'R') {
+        toggleAvionicsDrawer();
+      } else if (e.key === 'h' || e.key === 'H') {
+        toggleZenMode();
+      } else if (e.key === 'f' || e.key === 'F') {
+        recenterMap();
+      } else if (e.key === 'Escape') {
+        closeCadastralModal();
+        if (isZenMode) toggleZenMode();
       }
     });
 
-    // Connect on boot
+    // Boot GCS Engine
+    initMap();
+    drawPolarRadar();
+    window.addEventListener('resize', drawPolarRadar);
     connectMqtt();
   </script>
 </body>
