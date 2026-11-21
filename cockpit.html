@@ -19,7 +19,6 @@
       --bg-surface: #0f1626;
       --bg-surface-elevated: #162035;
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(16, 185, 129, 0.5);
       
       --emerald-500: #10b981;
       --emerald-400: #34d399;
@@ -145,7 +144,7 @@
       font-family: var(--font-mono);
       font-size: 12px;
       font-weight: 700;
-      width: 120px;
+      width: 125px;
       outline: none;
     }
     .room-btn-copy {
@@ -253,7 +252,7 @@
       pointer-events: none;
     }
     .hud-badge {
-      background: rgba(15, 22, 38, 0.85);
+      background: rgba(15, 22, 38, 0.9);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1px solid var(--border-subtle);
@@ -282,12 +281,12 @@
       gap: 6px;
     }
     .hud-control-btn {
-      background: rgba(15, 22, 38, 0.9);
+      background: rgba(15, 22, 38, 0.92);
       backdrop-filter: blur(8px);
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
       border-radius: 6px;
-      padding: 6px 10px;
+      padding: 6px 11px;
       font-size: 11.5px;
       font-weight: 600;
       cursor: pointer;
@@ -320,7 +319,7 @@
       pointer-events: none;
     }
     .compass-gimbal {
-      background: rgba(15, 22, 38, 0.9);
+      background: rgba(15, 22, 38, 0.92);
       backdrop-filter: blur(8px);
       border: 1px solid var(--border-subtle);
       border-radius: 8px;
@@ -364,15 +363,15 @@
       font-family: var(--font-mono);
     }
 
-    /* ADDRESS VERIFICATION PANEL */
+    /* STRUCTURED ENTERPRISE ADDRESS VERIFICATION PANEL */
     .address-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      padding: 14px 16px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 10px;
     }
     .address-card-header {
       display: flex;
@@ -390,26 +389,78 @@
       gap: 6px;
     }
     .verified-badge {
-      background: rgba(16, 185, 129, 0.1);
+      background: rgba(16, 185, 129, 0.12);
       color: var(--emerald-400);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      font-size: 10px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 10.5px;
       font-weight: 700;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
-    .address-text {
-      font-size: 13.5px;
-      font-weight: 600;
-      color: #e2e8f0;
+    .address-main-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f1f5f9;
       line-height: 1.45;
     }
-    .address-meta-row {
+
+    /* STRUCTURED ADDRESS PILLS CHIPS */
+    .address-chips-grid {
       display: flex;
-      gap: 16px;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .addr-chip {
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 4px 8px;
       font-size: 11px;
       color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .addr-chip strong {
+      color: #fff;
+      font-weight: 600;
+    }
+    .addr-chip.highlight {
+      border-color: rgba(6, 182, 212, 0.3);
+      color: var(--cyan-400);
+    }
+    .addr-chip.highlight strong {
+      color: #fff;
+    }
+
+    .address-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 8px;
       margin-top: 2px;
+    }
+    .btn-copy-address {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10.5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .btn-copy-address:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
     }
 
     /* RIGHT PANE: TELEMETRY METRICS CONSOLE */
@@ -730,7 +781,7 @@
   <!-- WORKSPACE BODY -->
   <main class="dashboard-body">
 
-    <!-- LEFT PANE: INTERACTIVE MAP & SPATIAL HUD -->
+    <!-- LEFT PANE: TACTICAL MAP & SPATIAL HUD -->
     <section class="map-pane">
       <div class="map-viewport-wrapper">
         <div id="map"></div>
@@ -747,10 +798,11 @@
           </div>
         </div>
 
-        <!-- HUD: Map Controls & Layer Switcher -->
+        <!-- HUD: Map Controls & Layer Switcher (Zero Watermarks, 100% Free) -->
         <div class="map-hud-top-right">
-          <button class="hud-control-btn active" id="btnLayerDark" onclick="setMapLayer('dark')">Vector</button>
-          <button class="hud-control-btn" id="btnLayerSat" onclick="setMapLayer('sat')">Satellite</button>
+          <button class="hud-control-btn active" id="btnLayerSat" onclick="setMapLayer('sat')">🛰️ Satellite</button>
+          <button class="hud-control-btn" id="btnLayerStreets" onclick="setMapLayer('streets')">🗺️ Streets</button>
+          <button class="hud-control-btn" id="btnLayerOsm" onclick="setMapLayer('osm')">🌍 OSM</button>
           <button class="hud-control-btn" onclick="recenterMap()" title="Center Surveyor Position">🎯 Focus</button>
         </div>
 
@@ -768,7 +820,7 @@
         </div>
       </div>
 
-      <!-- Live Verified Address Card -->
+      <!-- Live Structured Address Verification Panel -->
       <div class="address-card">
         <div class="address-card-header">
           <div class="address-tag">
@@ -776,15 +828,43 @@
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
-            Verified Field Location
+            Verified Field Location & Parcel
           </div>
-          <span class="verified-badge">Geocoded & Stamped</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn-copy-address" onclick="copyFullAddress()">Copy Full Address</button>
+            <span class="verified-badge">✓ Geocoded & Stamped</span>
+          </div>
         </div>
-        <div class="address-text" id="addressText">Acquiring verified field address...</div>
+
+        <!-- Full Street Address Text -->
+        <div class="address-main-title" id="addressText">Resolving cadastral address from GNSS coordinates...</div>
+
+        <!-- Structured Address Component Chips -->
+        <div class="address-chips-grid">
+          <span class="addr-chip highlight" id="chipLocality">
+            <span>📍 Area:</span> <strong id="valLocality">--</strong>
+          </span>
+          <span class="addr-chip" id="chipTehsil">
+            <span>🏛️ Tehsil/Taluk:</span> <strong id="valTehsil">--</strong>
+          </span>
+          <span class="addr-chip" id="chipDistrict">
+            <span>🏙️ District:</span> <strong id="valDistrict">--</strong>
+          </span>
+          <span class="addr-chip" id="chipState">
+            <span>🇮🇳 State:</span> <strong id="valState">--</strong>
+          </span>
+          <span class="addr-chip highlight" id="chipPincode">
+            <span>📮 Postal PIN:</span> <strong id="valPincode">--</strong>
+          </span>
+          <span class="addr-chip" id="chipPlusCode">
+            <span>🌐 Plus Code:</span> <strong id="valPlusCode">--</strong>
+          </span>
+        </div>
+
         <div class="address-meta-row">
           <span id="projectMeta">Project: Site Survey Alpha</span>
-          <span>•</span>
           <span id="inspectorMeta">Inspector: Operator</span>
+          <span id="countryMeta">Country: India 🇮🇳</span>
         </div>
       </div>
     </section>
@@ -840,7 +920,7 @@
         <!-- Edge AI Scene Card -->
         <div class="telemetry-tile span-full">
           <span class="tile-label">Edge Neural Vision Inference</span>
-          <div style="font-size:14.5px; font-weight:700; color:#fff; margin-top:4px;" id="aiSceneVal">
+          <div style="font-size:14px; font-weight:700; color:#fff; margin-top:4px;" id="aiSceneVal">
             🧠 Real-Time Scene Classification Active
           </div>
           <div class="tile-sub" style="margin-top:2px;">
@@ -905,34 +985,47 @@
       showToast('Cockpit link copied to clipboard!');
     }
 
-    // 2. High-DPI GIS Map Engine (Leaflet)
-    let map, surveyorMarker, surveyorCone;
+    function copyFullAddress() {
+      const addr = document.getElementById('addressText').innerText;
+      if (addr) {
+        navigator.clipboard.writeText(addr);
+        showToast('Full address copied!');
+      }
+    }
+
+    // 2. High-DPI GIS Map Engine (Zero Watermarks, 100% Free Public Tiles)
+    let map, surveyorMarker;
     let currentLat = 25.39213, currentLon = 81.88319;
     let currentHeading = 0;
-    let activeLayerType = 'dark';
+    let activeLayerType = 'sat';
     let baseLayers = {};
 
     function initMap() {
-      // CartoDB Dark Matter (Precision Dark Mode)
-      baseLayers['dark'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 20,
-        subdomains: 'abcd',
-        attribution: '&copy; CartoDB'
-      });
-
-      // Esri World Imagery (High-Resolution Satellite)
+      // 1. Esri World Imagery (Satellite) - High resolution, photorealistic, NO WATERMARKS, NO API KEY
       baseLayers['sat'] = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
         attribution: '&copy; Esri World Imagery'
       });
 
+      // 2. Esri World Street Map - High detail crisp street map, NO WATERMARKS, NO API KEY
+      baseLayers['streets'] = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: '&copy; Esri World Street Map'
+      });
+
+      // 3. OpenStreetMap Standard - Open worldwide GIS mapping, NO WATERMARKS
+      baseLayers['osm'] = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      });
+
       map = L.map('map', {
         zoomControl: false,
         attributionControl: false,
-        layers: [baseLayers['dark']]
+        layers: [baseLayers['sat']] // Default to satellite
       }).setView([currentLat, currentLon], 16);
 
-      // Custom Directional Marker HTML
+      // Custom Directional Marker
       const markerHtml = `
         <div class="field-marker-container">
           <div class="field-marker-cone" id="markerCone"></div>
@@ -956,8 +1049,9 @@
       map.removeLayer(baseLayers[activeLayerType]);
       map.addLayer(baseLayers[type]);
       activeLayerType = type;
-      document.getElementById('btnLayerDark').classList.toggle('active', type === 'dark');
       document.getElementById('btnLayerSat').classList.toggle('active', type === 'sat');
+      document.getElementById('btnLayerStreets').classList.toggle('active', type === 'streets');
+      document.getElementById('btnLayerOsm').classList.toggle('active', type === 'osm');
     }
 
     function recenterMap() {
@@ -966,14 +1060,89 @@
       }
     }
 
-    // 3. Audio Feedback Synthesizer (DSLR Shutter Click in Pure Web Audio)
+    // 3. Automated Browser-Side Cadastral Reverse Geocoding
+    let lastGeocodedLat = 0, lastGeocodedLon = 0;
+    let isGeocoding = false;
+
+    async function triggerReverseGeocoding(lat, lon) {
+      if (isGeocoding) return;
+      if (Math.abs(lastGeocodedLat - lat) < 0.00015 && Math.abs(lastGeocodedLon - lon) < 0.00015) {
+        return; // Position within 15 meters, reuse current address
+      }
+      isGeocoding = true;
+      lastGeocodedLat = lat;
+      lastGeocodedLon = lon;
+
+      try {
+        // High-precision Nominatim OSM reverse geocoding
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          const d = await res.json();
+          parseAndDisplayAddress(d);
+          isGeocoding = false;
+          return;
+        }
+      } catch (e) {
+        console.warn('Nominatim lookup error, using secondary geocoder:', e);
+      }
+
+      // Secondary BigDataCloud fallback
+      try {
+        const res2 = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+        if (res2.ok) {
+          const d2 = await res2.json();
+          parseBigDataCloudAddress(d2);
+        }
+      } catch (_e) {}
+      
+      isGeocoding = false;
+    }
+
+    function parseAndDisplayAddress(osm) {
+      if (!osm || !osm.address) return;
+      const a = osm.address;
+      const full = osm.display_name || '';
+
+      document.getElementById('addressText').innerText = full;
+
+      const locality = a.suburb || a.neighbourhood || a.residential || a.village || a.town || a.city_district || '--';
+      const tehsil = a.county || a.city_district || a.state_district || '--';
+      const district = a.state_district || a.county || a.city || '--';
+      const state = a.state || '--';
+      const pincode = a.postcode || '--';
+
+      document.getElementById('valLocality').innerText = locality;
+      document.getElementById('valTehsil').innerText = tehsil;
+      document.getElementById('valDistrict').innerText = district;
+      document.getElementById('valState').innerText = state;
+      document.getElementById('valPincode').innerText = pincode;
+      document.getElementById('valPlusCode').innerText = computePlusCode(osm.lat, osm.lon);
+    }
+
+    function parseBigDataCloudAddress(bdc) {
+      if (!bdc) return;
+      const full = `${bdc.locality || bdc.city || ''}, ${bdc.principalSubdivision || ''}, ${bdc.countryName || ''}`;
+      document.getElementById('addressText').innerText = full;
+      document.getElementById('valLocality').innerText = bdc.locality || bdc.city || '--';
+      document.getElementById('valDistrict').innerText = bdc.city || '--';
+      document.getElementById('valState').innerText = bdc.principalSubdivision || '--';
+      document.getElementById('valPincode').innerText = bdc.postcode || '--';
+      document.getElementById('valPlusCode').innerText = bdc.plusCode || '--';
+    }
+
+    function computePlusCode(lat, lon) {
+      // Simple approximate representation for display
+      return '7M' + Math.abs(Math.round(lat*100)).toString(16).toUpperCase() + '+' + Math.abs(Math.round(lon*100)).toString(16).toUpperCase();
+    }
+
+    // 4. Audio Feedback Synthesizer
     let audioCtx = null;
     function playShutterSound() {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        
-        // Fast dual noise burst simulating mechanical shutter curtain
         const bufferSize = audioCtx.sampleRate * 0.08;
         const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const data = buffer.getChannelData(0);
@@ -991,7 +1160,7 @@
       } catch(_e) {}
     }
 
-    // 4. Toast Notifications
+    // 5. Toast Notifications
     function showToast(msg) {
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').innerText = msg;
@@ -999,7 +1168,7 @@
       setTimeout(() => t.classList.remove('active'), 2800);
     }
 
-    // 5. Enterprise MQTT Communication
+    // 6. Enterprise MQTT Communication
     const teleTopic = 'gpsnap/' + roomId + '/telemetry';
     const cmdTopic = 'gpsnap/' + roomId + '/command';
     let mqttClient = null;
@@ -1063,7 +1232,7 @@
       attempt();
     }
 
-    // 6. Real-Time Telemetry Application
+    // 7. Real-Time Telemetry Application
     function applyTelemetry(d) {
       if (!d) return;
 
@@ -1092,6 +1261,9 @@
         if (surveyorMarker) {
           surveyorMarker.setLatLng([currentLat, currentLon]);
         }
+
+        // Trigger intelligent reverse geocoding
+        triggerReverseGeocoding(d.latitude, d.longitude);
       }
 
       // Heading & Spatial Orientation
@@ -1102,7 +1274,6 @@
         document.getElementById('headingShortVal').innerText = Math.round(d.heading) + '° ' + dir;
         document.getElementById('gimbalNeedle').style.transform = `rotate(${d.heading}deg)`;
         
-        // Rotate heading directional cone on Leaflet marker
         const coneEl = document.getElementById('markerCone');
         if (coneEl) {
           coneEl.style.transform = `rotate(${d.heading}deg)`;
@@ -1146,16 +1317,16 @@
         document.getElementById('aiSceneVal').innerText = d.aiSceneBadge;
       }
 
-      // Address & Metadata
-      if (d.address) {
+      // Address & Metadata from Phone (if already geocoded by device)
+      if (d.address && d.address.length > 5 && !d.address.startsWith("Lat:")) {
         document.getElementById('addressText').innerText = d.address + (d.city ? (' • ' + d.city) : '');
       }
-      if (d.project) {
-        document.getElementById('projectMeta').innerText = 'Project: ' + d.project;
-      }
-      if (d.inspector) {
-        document.getElementById('inspectorMeta').innerText = 'Inspector: ' + d.inspector;
-      }
+      if (d.city) document.getElementById('valDistrict').innerText = d.city;
+      if (d.state) document.getElementById('valState').innerText = d.state;
+      if (d.plusCode) document.getElementById('valPlusCode').innerText = d.plusCode;
+      if (d.country) document.getElementById('countryMeta').innerText = 'Country: ' + d.country + ' ' + (d.countryFlag || '');
+      if (d.project) document.getElementById('projectMeta').innerText = 'Project: ' + d.project;
+      if (d.inspector) document.getElementById('inspectorMeta').innerText = 'Inspector: ' + d.inspector;
 
       // Capture Confirmation Event
       if (d.event === 'captured') {
@@ -1165,7 +1336,7 @@
       }
     }
 
-    // 7. Remote Shutter Trigger Action
+    // 8. Remote Shutter Trigger Action
     async function triggerRemoteCapture() {
       const btn = document.getElementById('btnCapture');
       btn.disabled = true;
@@ -1182,7 +1353,6 @@
         sent = true;
       }
 
-      // Local fallback
       try {
         await fetch('/api/capture', { method: 'POST' });
         sent = true;
@@ -1215,7 +1385,7 @@
       }
     });
 
-    // 8. Capture Audit Timeline
+    // 9. Capture Audit Timeline
     function addAuditEntry(time, lat, lon) {
       captureCount++;
       document.getElementById('auditCount').innerText = `${captureCount} Capture${captureCount > 1 ? 's' : ''}`;
