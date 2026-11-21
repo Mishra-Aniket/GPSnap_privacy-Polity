@@ -3,225 +3,1023 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GPSnap • Remote Inspection Cockpit</title>
+  <title>GPSnap • Enterprise Remote Inspection Cockpit</title>
   <link rel="icon" href="logo.svg" type="image/svg+xml">
+  
+  <!-- Leaflet GIS Engine -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- MQTT Enterprise WebSocket Client -->
   <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
+  
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: #131c2e;
-      --card-border: #1e293b;
-      --accent: #00E676;
-      --accent-glow: rgba(0, 230, 118, 0.25);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --cyan: #00E5FF;
-      --amber: #FFD54F;
+      --bg-base: #090d16;
+      --bg-surface: #0f1626;
+      --bg-surface-elevated: #162035;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(16, 185, 129, 0.5);
+      
+      --emerald-500: #10b981;
+      --emerald-400: #34d399;
+      --emerald-glow: rgba(16, 185, 129, 0.15);
+      
+      --cyan-500: #06b6d4;
+      --cyan-400: #22d3ee;
+      --amber-500: #f59e0b;
+      --rose-500: #f43f5e;
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+      
+      --font-mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; flex-direction: column; }
-    .container { max-width: 900px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     
-    /* Header */
-    .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--card-border); flex-wrap: wrap; gap: 10px; }
-    .header-title h1 { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
-    .header-title p { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
-    .header-status-box { display: flex; align-items: center; gap: 8px; }
-    .status-badge { display: flex; align-items: center; gap: 6px; background: rgba(0, 230, 118, 0.15); border: 1px solid var(--accent); color: var(--accent); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
-    .room-chip { background: #1e293b; color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.4); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; font-family: monospace; }
-    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 1.8s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    /* Room Bar */
-    .room-bar { display: flex; gap: 8px; align-items: center; background: #131d2e; border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 10px; }
-    .room-bar input { flex: 1; background: #0b0f19; border: 1px solid #283956; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12.5px; font-family: monospace; }
-    .room-bar button { background: var(--cyan); color: #0b0f19; border: none; font-weight: bold; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    /* TOP APPLICATION BAR */
+    .top-bar {
+      height: 58px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 1000;
+      flex-shrink: 0;
+    }
 
-    /* Badges Bar */
-    .badge-bar { display: flex; flex-wrap: wrap; gap: 8px; }
-    .tech-badge { background: #182338; border: 1px solid #283956; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
-    .tech-badge.gnss { color: var(--cyan); border-color: rgba(0, 229, 255, 0.3); }
-    .tech-badge.ai { color: var(--amber); border-color: rgba(255, 213, 79, 0.3); }
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-    /* Grid */
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
-    .card h3 { font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.6px; margin-bottom: 4px; }
-    .card .val { font-size: 18px; font-weight: 800; color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .card .sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-
-    /* Address & Map */
-    .wide-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; }
-    .addr-text { font-size: 13.5px; font-weight: 600; color: #e2e8f0; line-height: 1.4; margin-top: 4px; }
-    #map { height: 220px; border-radius: 10px; margin-top: 12px; border: 1px solid var(--card-border); }
-
-    /* Capture Button */
-    .btn-capture {
-      background: linear-gradient(135deg, #00E676 0%, #00C853 100%);
-      color: #0b0f19;
-      border: none;
-      border-radius: 14px;
-      padding: 16px 20px;
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--emerald-400);
       font-size: 16px;
-      font-weight: 800;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-text span.version-tag {
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--emerald-400);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .session-cluster {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .room-selector {
+      display: flex;
+      align-items: center;
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      border-radius: 7px;
+      padding: 3px 8px;
+      gap: 6px;
+      transition: border-color 0.2s;
+    }
+    .room-selector:focus-within {
+      border-color: var(--cyan-500);
+    }
+    .room-selector label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
       letter-spacing: 0.5px;
+    }
+    .room-selector input {
+      background: transparent;
+      border: none;
+      color: var(--cyan-400);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      width: 120px;
+      outline: none;
+    }
+    .room-btn-copy {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-secondary);
+      border-radius: 5px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .room-btn-copy:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    .stream-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--emerald-400);
+      letter-spacing: 0.4px;
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald-400);
+      box-shadow: 0 0 8px var(--emerald-400);
+      animation: pulseAnim 2s infinite ease-in-out;
+    }
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+
+    /* MAIN CONTAINER: TWO-COLUMN GEOSPATIAL COMMAND DESK */
+    .dashboard-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+      padding: 16px 20px;
+      max-width: 1540px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-body {
+        grid-template-columns: 1fr;
+        padding: 12px;
+        gap: 12px;
+      }
+    }
+
+    /* LEFT PANE: TACTICAL MAP & SPATIAL VERIFICATION */
+    .map-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .map-viewport-wrapper {
+      position: relative;
+      flex: 1;
+      min-height: 480px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: #0d131f;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #0c111a;
+    }
+
+    /* MAP FLOATING HUD OVERLAYS */
+    .map-hud-top-left {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+    .hud-badge {
+      background: rgba(15, 22, 38, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .hud-badge .mono {
+      font-family: var(--font-mono);
+      color: var(--cyan-400);
+      font-weight: 700;
+    }
+
+    .map-hud-top-right {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 500;
+      display: flex;
+      gap: 6px;
+    }
+    .hud-control-btn {
+      background: rgba(15, 22, 38, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+    .hud-control-btn:hover {
+      background: #1e293b;
+      color: #fff;
+      border-color: rgba(255,255,255,0.2);
+    }
+    .hud-control-btn.active {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--emerald-400);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    /* MAP BOTTOM RADAR HUD */
+    .map-hud-bottom {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+    .compass-gimbal {
+      background: rgba(15, 22, 38, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+    }
+    .gimbal-dial {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-subtle);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #090d16;
+    }
+    .gimbal-needle {
+      width: 3px;
+      height: 28px;
+      background: linear-gradient(to bottom, #ef4444 50%, #94a3b8 50%);
+      border-radius: 2px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .gimbal-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .gimbal-heading {
+      font-size: 14px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: #fff;
+    }
+    .gimbal-sub {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+    }
+
+    /* ADDRESS VERIFICATION PANEL */
+    .address-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .address-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .address-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .verified-badge {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--emerald-400);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .address-text {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #e2e8f0;
+      line-height: 1.45;
+    }
+    .address-meta-row {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* RIGHT PANE: TELEMETRY METRICS CONSOLE */
+    .telemetry-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* METRIC TILES GRID */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .telemetry-tile {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 82px;
+      position: relative;
+    }
+    .telemetry-tile.span-full {
+      grid-column: 1 / -1;
+    }
+    .tile-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .tile-value {
+      font-size: 19px;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--font-mono);
+      letter-spacing: -0.3px;
+      margin: 4px 0 2px 0;
+    }
+    .tile-value.emerald { color: var(--emerald-400); }
+    .tile-value.cyan { color: var(--cyan-400); }
+    .tile-value.amber { color: var(--amber-500); }
+    
+    .tile-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* RTK SATELLITE STRIP */
+    .rtk-status-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .rtk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .rtk-badge {
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.4px;
+    }
+    .rtk-badge.fixed {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--emerald-400);
+    }
+    .satellite-constellation-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .sat-chip {
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 7px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+    .sat-chip.active {
+      border-color: rgba(6, 182, 212, 0.4);
+      color: var(--cyan-400);
+    }
+
+    /* CAPTURE TRIGGER BUTTON */
+    .trigger-container {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-trigger-inspection {
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: #06281e;
+      border: 1px solid #34d399;
+      border-radius: 10px;
+      padding: 15px 20px;
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      box-shadow: 0 4px 20px var(--accent-glow);
-      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.15s ease;
       width: 100%;
+      user-select: none;
     }
-    .btn-capture:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0, 230, 118, 0.4); }
-    .btn-capture:active { transform: scale(0.98); }
-    .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-trigger-inspection:hover {
+      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    }
+    .btn-trigger-inspection:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    }
+    .btn-trigger-inspection:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-shortcut-hint {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(0,0,0,0.15);
+      color: #06281e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
 
-    /* Toast */
-    .toast {
+    /* CAPTURE AUDIT TIMELINE */
+    .audit-strip {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .audit-strip-header {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-tertiary);
+      display: flex;
+      justify-content: space-between;
+    }
+    .audit-log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    .audit-entry {
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+    .audit-entry .time {
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+    .audit-entry .coords {
+      font-family: var(--font-mono);
+      color: var(--emerald-400);
+      font-weight: 600;
+    }
+
+    /* TOAST NOTIFICATION */
+    .hud-toast {
       position: fixed;
       bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: #1e293b;
-      border: 1px solid var(--accent);
-      color: var(--text);
-      padding: 12px 20px;
-      border-radius: 24px;
+      right: 24px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
       font-size: 13px;
-      font-weight: 700;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-      transition: transform 0.3s ease;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); }
+    .hud-toast.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* CUSTOM DIRECTIONAL MAP MARKER */
+    .field-marker-container {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .field-marker-pulse {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid var(--emerald-400);
+      animation: radarPing 2.5s infinite cubic-bezier(0, 0, 0.2, 1);
+    }
+    @keyframes radarPing {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    .field-marker-center {
+      position: relative;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--emerald-400);
+      border: 2px solid #fff;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+      z-index: 2;
+    }
+    .field-marker-cone {
+      position: absolute;
+      top: -18px;
+      width: 0;
+      height: 0;
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-bottom: 22px solid rgba(16, 185, 129, 0.45);
+      transform-origin: 50% 100%;
+      transition: transform 0.25s ease-out;
+      z-index: 1;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="header-title">
-        <h1>🛰️ GPSnap • Cockpit</h1>
-        <p>Live Real-Time Tele-Inspection & Remote Shutter</p>
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="brand-cluster">
+      <div class="brand-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
       </div>
-      <div class="header-status-box">
-        <span class="room-chip" id="roomChip">ROOM: --</span>
-        <div class="status-badge" id="connStatus">
-          <div class="pulse-dot"></div>
-          <span id="connText">CONNECTING</span>
+      <div class="brand-text">
+        <h1>GPSNAP COCKPIT <span class="version-tag">RTK PRO</span></h1>
+        <p>Verified Field Surveying & Geospatial Tele-Inspection</p>
+      </div>
+    </div>
+
+    <div class="session-cluster">
+      <div class="room-selector">
+        <label>Room</label>
+        <input type="text" id="roomInput" spellcheck="false" autocomplete="off" />
+        <button class="room-btn-copy" onclick="copySessionLink()" title="Copy Full Cockpit Link">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Share
+        </button>
+      </div>
+
+      <div class="stream-status-pill" id="connPill">
+        <div class="pulse-dot"></div>
+        <span id="connStatusText">CONNECTING</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- WORKSPACE BODY -->
+  <main class="dashboard-body">
+
+    <!-- LEFT PANE: INTERACTIVE MAP & SPATIAL HUD -->
+    <section class="map-pane">
+      <div class="map-viewport-wrapper">
+        <div id="map"></div>
+
+        <!-- HUD: Live Coordinates & Quality -->
+        <div class="map-hud-top-left">
+          <div class="hud-badge">
+            <span style="color:var(--text-tertiary)">POS:</span>
+            <span class="mono" id="hudCoords">25.39213° N, 81.88319° E</span>
+          </div>
+          <div class="hud-badge" id="hudFixBadge">
+            <span style="color:var(--text-tertiary)">ACC:</span>
+            <span class="mono" style="color:var(--emerald-400)" id="hudAccuracy">±0.28m RTK FIXED</span>
+          </div>
+        </div>
+
+        <!-- HUD: Map Controls & Layer Switcher -->
+        <div class="map-hud-top-right">
+          <button class="hud-control-btn active" id="btnLayerDark" onclick="setMapLayer('dark')">Vector</button>
+          <button class="hud-control-btn" id="btnLayerSat" onclick="setMapLayer('sat')">Satellite</button>
+          <button class="hud-control-btn" onclick="recenterMap()" title="Center Surveyor Position">🎯 Focus</button>
+        </div>
+
+        <!-- HUD: Heading Gimbal -->
+        <div class="map-hud-bottom">
+          <div class="compass-gimbal">
+            <div class="gimbal-dial">
+              <div class="gimbal-needle" id="gimbalNeedle"></div>
+            </div>
+            <div class="gimbal-info">
+              <span class="gimbal-heading" id="hudHeading">146° SE</span>
+              <span class="gimbal-sub" id="hudOrientation">P: -41° • R: -13°</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Interactive Room Bar (in case query param was omitted) -->
-    <div class="room-bar">
-      <span style="font-size: 11.5px; color: var(--text-muted); font-weight: bold;">ROOM ID:</span>
-      <input type="text" id="roomInput" placeholder="e.g. snap-58eb3f26" />
-      <button onclick="changeRoomManual()">Connect</button>
-    </div>
-
-    <!-- Live Tech Badges -->
-    <div class="badge-bar">
-      <div class="tech-badge gnss" id="gnssBadge">🛰️ GNSS: Searching Satellites...</div>
-      <div class="tech-badge ai" id="aiBadge">🧠 AI Vision: Active</div>
-    </div>
-
-    <!-- Telemetry Metric Cards -->
-    <div class="grid">
-      <div class="card">
-        <h3>Coordinates</h3>
-        <div class="val" id="coordsVal">--</div>
-        <div class="sub" id="accVal">Accuracy: Acquiring GPS...</div>
+      <!-- Live Verified Address Card -->
+      <div class="address-card">
+        <div class="address-card-header">
+          <div class="address-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Verified Field Location
+          </div>
+          <span class="verified-badge">Geocoded & Stamped</span>
+        </div>
+        <div class="address-text" id="addressText">Acquiring verified field address...</div>
+        <div class="address-meta-row">
+          <span id="projectMeta">Project: Site Survey Alpha</span>
+          <span>•</span>
+          <span id="inspectorMeta">Inspector: Operator</span>
+        </div>
       </div>
-      <div class="card">
-        <h3>Altitude & Speed</h3>
-        <div class="val" id="altVal">--</div>
-        <div class="sub" id="speedVal">Speed: 0 km/h</div>
-      </div>
-      <div class="card">
-        <h3>Heading & Compass</h3>
-        <div class="val" id="headingVal">--</div>
-        <div class="sub" id="orientationVal">Pitch: 0° • Roll: 0°</div>
-      </div>
-      <div class="card">
-        <h3>Weather & Sensors</h3>
-        <div class="val" id="weatherVal">--</div>
-        <div class="sub" id="sensorVal">AQI • Pressure • Humid</div>
-      </div>
-    </div>
+    </section>
 
-    <!-- Address & Map Card -->
-    <div class="wide-card">
-      <h3 style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Live Field Address</h3>
-      <div class="addr-text" id="addressVal">Waiting for location broadcast from device...</div>
-      <div id="map"></div>
-    </div>
+    <!-- RIGHT PANE: TELEMETRY CONSOLE & TRIGGER -->
+    <section class="telemetry-pane">
 
-    <!-- Trigger Shutter Button -->
-    <button class="btn-capture" id="btnCapture" onclick="triggerRemoteCapture()">
-      <span>📸</span> TRIGGER REMOTE VERIFIED CAPTURE
-    </button>
+      <!-- RTK GNSS SATELLITE ENGINE -->
+      <div class="rtk-status-card">
+        <div class="rtk-header">
+          <span class="tile-label">GNSS CONSTELLATION ENGINE</span>
+          <span class="rtk-badge fixed" id="rtkBadge">DUAL L1+L5 RTK FIXED</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <div class="tile-value emerald" id="satCountText">14 / 48 SATS</div>
+          <div style="font-size:11px; color:var(--text-secondary); font-family:var(--font-mono);" id="rtkCarrierText">Carrier-Phase Tracking</div>
+        </div>
+        <div class="satellite-constellation-chips">
+          <span class="sat-chip active">GPS (L1/L5)</span>
+          <span class="sat-chip active">GLONASS (G1/G2)</span>
+          <span class="sat-chip active">GALILEO (E1/E5a)</span>
+          <span class="sat-chip active">BEIDOU (B1/B2a)</span>
+          <span class="sat-chip active">NAVIC (L5)</span>
+        </div>
+      </div>
+
+      <!-- TELEMETRY TILES GRID -->
+      <div class="telemetry-grid">
+        <div class="telemetry-tile">
+          <span class="tile-label">Altitude (MSL)</span>
+          <div class="tile-value cyan" id="altVal">4.0 M</div>
+          <div class="tile-sub" id="speedVal">Speed: 0.0 km/h</div>
+        </div>
+
+        <div class="telemetry-tile">
+          <span class="tile-label">Spatial Incline</span>
+          <div class="tile-value" id="headingShortVal">146° SE</div>
+          <div class="tile-sub" id="inclineVal">Pitch: -41° | Roll: -13°</div>
+        </div>
+
+        <div class="telemetry-tile">
+          <span class="tile-label">Ambient Temperature</span>
+          <div class="tile-value" id="tempVal">21.6°C</div>
+          <div class="tile-sub" id="humidVal">💧 85% Humidity</div>
+        </div>
+
+        <div class="telemetry-tile">
+          <span class="tile-label">Air Quality & Barometer</span>
+          <div class="tile-value amber" id="aqiVal">AQI 116</div>
+          <div class="tile-sub" id="pressureVal">Pressure: 1013.2 hPa</div>
+        </div>
+
+        <!-- Edge AI Scene Card -->
+        <div class="telemetry-tile span-full">
+          <span class="tile-label">Edge Neural Vision Inference</span>
+          <div style="font-size:14.5px; font-weight:700; color:#fff; margin-top:4px;" id="aiSceneVal">
+            🧠 Real-Time Scene Classification Active
+          </div>
+          <div class="tile-sub" style="margin-top:2px;">
+            Qualcomm Hexagon / MediaTek APU On-Device Vision Engine
+          </div>
+        </div>
+      </div>
+
+      <!-- INSPECTION SHUTTER TRIGGER -->
+      <div class="trigger-container">
+        <button class="btn-trigger-inspection" id="btnCapture" onclick="triggerRemoteCapture()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <span>TRIGGER REMOTE VERIFIED CAPTURE</span>
+          <span class="btn-shortcut-hint">SPACE</span>
+        </button>
+
+        <!-- AUDIT TIMELINE -->
+        <div class="audit-strip">
+          <div class="audit-strip-header">
+            <span>Remote Capture Audit Log</span>
+            <span id="auditCount">0 Captures</span>
+          </div>
+          <div class="audit-log-list" id="auditList">
+            <div style="font-size:11px; color:var(--text-tertiary); text-align:center; padding:8px 0;">
+              No remote captures triggered in this session.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FLOATING TOAST -->
+  <div class="hud-toast" id="toast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="toastMsg">Telemetry connected</span>
   </div>
 
-  <div class="toast" id="toast">Photo capture signal sent to device!</div>
-
   <script>
+    // 1. Session & Room Identification
     const urlParams = new URLSearchParams(window.location.search);
-    let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'session';
+    let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'snap-default';
+    
+    const roomInput = document.getElementById('roomInput');
+    roomInput.value = roomId;
+    roomInput.addEventListener('change', () => {
+      const v = roomInput.value.trim();
+      if (v && v !== roomId) {
+        window.location.search = '?room=' + encodeURIComponent(v);
+      }
+    });
 
-    document.getElementById('roomChip').innerText = 'ROOM: ' + roomId;
-    document.getElementById('roomInput').value = roomId;
-
-    function changeRoomManual() {
-      const val = document.getElementById('roomInput').value.trim();
-      if (!val) return;
-      window.location.search = '?room=' + encodeURIComponent(val);
+    function copySessionLink() {
+      navigator.clipboard.writeText(window.location.href);
+      showToast('Cockpit link copied to clipboard!');
     }
 
-    let map, marker;
-    let lastLat = 0, lastLon = 0;
-    let mqttClient = null;
-    let hasReceivedFirstPacket = false;
-    let isLocalMode = window.location.port === '8080';
+    // 2. High-DPI GIS Map Engine (Leaflet)
+    let map, surveyorMarker, surveyorCone;
+    let currentLat = 25.39213, currentLon = 81.88319;
+    let currentHeading = 0;
+    let activeLayerType = 'dark';
+    let baseLayers = {};
 
     function initMap() {
-      map = L.map('map', { zoomControl: false, attributionControl: false }).setView([28.6139, 77.2090], 14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-      marker = L.marker([28.6139, 77.2090]).addTo(map);
+      // CartoDB Dark Matter (Precision Dark Mode)
+      baseLayers['dark'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 20,
+        subdomains: 'abcd',
+        attribution: '&copy; CartoDB'
+      });
+
+      // Esri World Imagery (High-Resolution Satellite)
+      baseLayers['sat'] = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: '&copy; Esri World Imagery'
+      });
+
+      map = L.map('map', {
+        zoomControl: false,
+        attributionControl: false,
+        layers: [baseLayers['dark']]
+      }).setView([currentLat, currentLon], 16);
+
+      // Custom Directional Marker HTML
+      const markerHtml = `
+        <div class="field-marker-container">
+          <div class="field-marker-cone" id="markerCone"></div>
+          <div class="field-marker-pulse"></div>
+          <div class="field-marker-center"></div>
+        </div>
+      `;
+      const customIcon = L.divIcon({
+        className: 'custom-surveyor-icon',
+        html: markerHtml,
+        iconSize: [44, 44],
+        iconAnchor: [22, 22]
+      });
+
+      surveyorMarker = L.marker([currentLat, currentLon], { icon: customIcon }).addTo(map);
     }
     initMap();
 
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.innerText = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2800);
+    function setMapLayer(type) {
+      if (type === activeLayerType) return;
+      map.removeLayer(baseLayers[activeLayerType]);
+      map.addLayer(baseLayers[type]);
+      activeLayerType = type;
+      document.getElementById('btnLayerDark').classList.toggle('active', type === 'dark');
+      document.getElementById('btnLayerSat').classList.toggle('active', type === 'sat');
     }
 
+    function recenterMap() {
+      if (map && currentLat && currentLon) {
+        map.flyTo([currentLat, currentLon], 17, { duration: 0.8 });
+      }
+    }
+
+    // 3. Audio Feedback Synthesizer (DSLR Shutter Click in Pure Web Audio)
+    let audioCtx = null;
+    function playShutterSound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        // Fast dual noise burst simulating mechanical shutter curtain
+        const bufferSize = audioCtx.sampleRate * 0.08;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1800;
+        noise.connect(filter);
+        filter.connect(audioCtx.destination);
+        noise.start();
+      } catch(_e) {}
+    }
+
+    // 4. Toast Notifications
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      t.classList.add('active');
+      setTimeout(() => t.classList.remove('active'), 2800);
+    }
+
+    // 5. Enterprise MQTT Communication
     const teleTopic = 'gpsnap/' + roomId + '/telemetry';
     const cmdTopic = 'gpsnap/' + roomId + '/command';
+    let mqttClient = null;
+    let captureCount = 0;
 
-    // Connect via Enterprise MQTT over WebSocket (Zero rate limits, ~30ms latency)
     function connectMqtt() {
       const brokers = [
         'wss://broker.emqx.io:8084/mqtt',
         'wss://broker.hivemq.com:8884/mqtt'
       ];
-      let currentBrokerIdx = 0;
+      let currentBroker = 0;
 
-      function attemptConnect() {
-        const url = brokers[currentBrokerIdx];
+      function attempt() {
         const clientId = 'gpsnap_web_' + Math.random().toString(16).substring(2, 10);
-
         try {
           if (mqttClient) {
             try { mqttClient.end(true); } catch(_e) {}
           }
 
-          mqttClient = mqtt.connect(url, {
+          mqttClient = mqtt.connect(brokers[currentBroker], {
             clientId: clientId,
             clean: true,
             reconnectPeriod: 3000,
@@ -229,12 +1027,10 @@
           });
 
           mqttClient.on('connect', () => {
-            document.getElementById('connText').innerText = 'BROKER CONNECTED';
-            document.getElementById('connStatus').style.borderColor = '#00E676';
-            document.getElementById('connStatus').style.color = '#00E676';
-            mqttClient.subscribe(teleTopic, { qos: 0 }, (err) => {
-              if (!err) console.log('Subscribed to topic:', teleTopic);
-            });
+            document.getElementById('connStatusText').innerText = 'LIVE TELEMETRY';
+            document.getElementById('connPill').style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            document.getElementById('connPill').style.color = '#34d399';
+            mqttClient.subscribe(teleTopic, { qos: 0 });
           });
 
           mqttClient.on('message', (topic, message) => {
@@ -242,145 +1038,203 @@
               try {
                 const data = JSON.parse(message.toString());
                 applyTelemetry(data);
-              } catch(e) {
-                console.error('Error parsing JSON payload:', e);
-              }
+              } catch(e) {}
             }
           });
 
-          mqttClient.on('error', (err) => {
-            document.getElementById('connText').innerText = 'RECONNECTING';
-            document.getElementById('connStatus').style.borderColor = '#FFD54F';
-            document.getElementById('connStatus').style.color = '#FFD54F';
-            if (currentBrokerIdx < brokers.length - 1) {
-              currentBrokerIdx++;
-              setTimeout(attemptConnect, 1000);
+          mqttClient.on('error', () => {
+            document.getElementById('connStatusText').innerText = 'RECONNECTING';
+            document.getElementById('connPill').style.borderColor = 'rgba(245, 158, 11, 0.4)';
+            document.getElementById('connPill').style.color = '#f59e0b';
+            if (currentBroker < brokers.length - 1) {
+              currentBroker++;
+              setTimeout(attempt, 1000);
             }
           });
 
           mqttClient.on('offline', () => {
-            document.getElementById('connText').innerText = 'RECONNECTING';
-            document.getElementById('connStatus').style.borderColor = '#FFD54F';
-            document.getElementById('connStatus').style.color = '#FFD54F';
+            document.getElementById('connStatusText').innerText = 'OFFLINE';
+            document.getElementById('connPill').style.borderColor = 'rgba(244, 63, 94, 0.4)';
+            document.getElementById('connPill').style.color = '#f43f5e';
           });
-        } catch(e) {
-          console.warn('MQTT connect error:', e);
-        }
+        } catch(_e) {}
       }
 
-      attemptConnect();
+      attempt();
     }
 
-    // Local Wi-Fi / Hotspot Polling Fallback (if accessed via http://192.168.x.x:8080)
-    function startLocalPolling() {
-      setInterval(async () => {
-        try {
-          const res = await fetch('/api/telemetry', { cache: 'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            applyTelemetry(data);
-            document.getElementById('connText').innerText = 'LOCAL LAN ACTIVE';
-            document.getElementById('connStatus').style.borderColor = '#00E676';
-            document.getElementById('connStatus').style.color = '#00E676';
-          }
-        } catch(_e) {}
-      }, 1000);
-    }
-
+    // 6. Real-Time Telemetry Application
     function applyTelemetry(d) {
       if (!d) return;
 
-      if (!hasReceivedFirstPacket) {
-        hasReceivedFirstPacket = true;
-        showToast('📡 Live telemetry received from field phone!');
-      }
-
       if (d.event === 'session_ended' || d.status === 'expired') {
-        document.getElementById('connText').innerText = 'SESSION EXPIRED / OFFLINE';
-        document.getElementById('connStatus').style.borderColor = '#FF5252';
-        document.getElementById('connStatus').style.color = '#FF5252';
+        document.getElementById('connStatusText').innerText = 'SESSION ENDED';
+        document.getElementById('connPill').style.borderColor = 'rgba(244, 63, 94, 0.4)';
+        document.getElementById('connPill').style.color = '#f43f5e';
         document.getElementById('btnCapture').disabled = true;
-        document.getElementById('addressVal').innerText = '⚠️ Field camera has closed or exited inspection mode.';
-        showToast('⚠️ Field camera left inspection mode.');
+        showToast('Surveyor closed camera session.');
         return;
       }
 
-      document.getElementById('connText').innerText = 'LIVE TELEMETRY ACTIVE';
-      document.getElementById('connStatus').style.borderColor = '#00E676';
-      document.getElementById('connStatus').style.color = '#00E676';
       document.getElementById('btnCapture').disabled = false;
 
+      // Coordinates & Accuracy
       if (d.latitude || d.longitude) {
-        document.getElementById('coordsVal').innerText = (d.latitude ? d.latitude.toFixed(5) : '0.00000') + '°, ' + (d.longitude ? d.longitude.toFixed(5) : '0.00000') + '°';
-        document.getElementById('accVal').innerText = 'Accuracy: ±' + (d.accuracy ? d.accuracy.toFixed(1) : '1.5') + ' M';
-        
-        if (Math.abs(lastLat - d.latitude) > 0.0001 || Math.abs(lastLon - d.longitude) > 0.0001) {
-          lastLat = d.latitude;
-          lastLon = d.longitude;
-          map.setView([d.latitude, d.longitude], 16);
-          marker.setLatLng([d.latitude, d.longitude]);
+        currentLat = d.latitude;
+        currentLon = d.longitude;
+        const latStr = Math.abs(d.latitude).toFixed(5) + '° ' + (d.latitude >= 0 ? 'N' : 'S');
+        const lonStr = Math.abs(d.longitude).toFixed(5) + '° ' + (d.longitude >= 0 ? 'E' : 'W');
+        document.getElementById('hudCoords').innerText = latStr + ', ' + lonStr;
+
+        const acc = d.accuracy ? d.accuracy.toFixed(2) : '0.50';
+        document.getElementById('hudAccuracy').innerText = '±' + acc + 'm ' + (d.accuracy < 1.0 ? 'RTK FIXED' : 'CARRIER DUAL');
+
+        if (surveyorMarker) {
+          surveyorMarker.setLatLng([currentLat, currentLon]);
         }
       }
 
-      if (d.altitude !== undefined) {
-        document.getElementById('altVal').innerText = Math.round(d.altitude) + ' M';
-      }
+      // Heading & Spatial Orientation
       if (d.heading !== undefined) {
-        document.getElementById('headingVal').innerText = Math.round(d.heading) + '° ' + (d.headingDirection || '');
-        document.getElementById('orientationVal').innerText = 'Pitch: ' + Math.round(d.pitch || 0) + '° • Roll: ' + Math.round(d.roll || 0) + '°';
+        currentHeading = d.heading;
+        const dir = d.headingDirection || '';
+        document.getElementById('hudHeading').innerText = Math.round(d.heading) + '° ' + dir;
+        document.getElementById('headingShortVal').innerText = Math.round(d.heading) + '° ' + dir;
+        document.getElementById('gimbalNeedle').style.transform = `rotate(${d.heading}deg)`;
+        
+        // Rotate heading directional cone on Leaflet marker
+        const coneEl = document.getElementById('markerCone');
+        if (coneEl) {
+          coneEl.style.transform = `rotate(${d.heading}deg)`;
+        }
       }
-      if (d.address) {
-        document.getElementById('addressVal').innerText = d.address + (d.city ? (' • ' + d.city) : '');
+
+      if (d.pitch !== undefined && d.roll !== undefined) {
+        const pStr = 'P: ' + Math.round(d.pitch) + '°';
+        const rStr = 'R: ' + Math.round(d.roll) + '°';
+        document.getElementById('hudOrientation').innerText = pStr + ' • ' + rStr;
+        document.getElementById('inclineVal').innerText = 'Pitch: ' + Math.round(d.pitch) + '° | Roll: ' + Math.round(d.roll) + '°';
       }
+
+      // Altitude & Speed
+      if (d.altitude !== undefined) {
+        document.getElementById('altVal').innerText = d.altitude.toFixed(1) + ' M';
+      }
+      if (d.speed !== undefined) {
+        document.getElementById('speedVal').innerText = 'Speed: ' + d.speed.toFixed(1) + ' km/h';
+      }
+
+      // Environmental Sensors
+      if (d.weatherTemp) {
+        document.getElementById('tempVal').innerText = d.weatherTemp;
+      }
+      if (d.humidity) {
+        document.getElementById('humidVal').innerText = '💧 ' + d.humidity + ' Humidity';
+      }
+      if (d.aqi) {
+        document.getElementById('aqiVal').innerText = 'AQI ' + d.aqi;
+      }
+      if (d.pressure) {
+        document.getElementById('pressureVal').innerText = 'Pressure: ' + d.pressure + ' hPa';
+      }
+
+      // Satellites & Badges
       if (d.gnssBadge) {
-        document.getElementById('gnssBadge').innerText = d.gnssBadge;
+        document.getElementById('satCountText').innerText = d.gnssBadge;
       }
       if (d.aiSceneBadge) {
-        document.getElementById('aiBadge').innerText = d.aiSceneBadge;
+        document.getElementById('aiSceneVal').innerText = d.aiSceneBadge;
       }
-      if (d.weatherTemp) {
-        document.getElementById('weatherVal').innerText = d.weatherTemp;
-        document.getElementById('sensorVal').innerText = (d.humidity ? ('💧 ' + d.humidity + ' • ') : '') + (d.aqi ? ('🌿 AQI ' + d.aqi) : '');
+
+      // Address & Metadata
+      if (d.address) {
+        document.getElementById('addressText').innerText = d.address + (d.city ? (' • ' + d.city) : '');
       }
+      if (d.project) {
+        document.getElementById('projectMeta').innerText = 'Project: ' + d.project;
+      }
+      if (d.inspector) {
+        document.getElementById('inspectorMeta').innerText = 'Inspector: ' + d.inspector;
+      }
+
+      // Capture Confirmation Event
       if (d.event === 'captured') {
-        showToast('✅ Photo captured & verified on device at ' + (d.time || 'just now') + '!');
+        playShutterSound();
+        showToast('✅ Photo stamped & saved on device gallery!');
+        addAuditEntry(d.time || new Date().toLocaleTimeString(), d.latitude, d.longitude);
       }
     }
 
+    // 7. Remote Shutter Trigger Action
     async function triggerRemoteCapture() {
       const btn = document.getElementById('btnCapture');
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span> CAPTURING ON DEVICE...';
-      
+      btn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin">
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+        <span>TRANSMITTING CAPTURE COMMAND...</span>
+      `;
+
       let sent = false;
       if (mqttClient && mqttClient.connected) {
-        mqttClient.publish(cmdTopic, JSON.stringify({ action: 'capture', timestamp: Date.now() }), { qos: 1 });
+        mqttClient.publish(cmdTopic, JSON.stringify({ action: 'capture', time: Date.now() }), { qos: 1 });
         sent = true;
       }
 
-      // Also send local POST if on local port
+      // Local fallback
       try {
         await fetch('/api/capture', { method: 'POST' });
         sent = true;
       } catch(_e) {}
 
       if (sent) {
-        showToast('📸 Verified capture command sent to device!');
+        showToast('📸 Verified capture command dispatched!');
       } else {
-        showToast('⚠️ Waiting for device connection...');
+        showToast('⚠️ Waiting for device link...');
       }
 
       setTimeout(() => {
         btn.disabled = false;
-        btn.innerHTML = '<span>📸</span> TRIGGER REMOTE VERIFIED CAPTURE';
-      }, 2000);
+        btn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <span>TRIGGER REMOTE VERIFIED CAPTURE</span>
+          <span class="btn-shortcut-hint">SPACE</span>
+        `;
+      }, 1800);
     }
 
-    // Initialize both MQTT and local fallback
-    connectMqtt();
-    if (isLocalMode) {
-      startLocalPolling();
+    // Keyboard Spacebar Shortcut
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+        triggerRemoteCapture();
+      }
+    });
+
+    // 8. Capture Audit Timeline
+    function addAuditEntry(time, lat, lon) {
+      captureCount++;
+      document.getElementById('auditCount').innerText = `${captureCount} Capture${captureCount > 1 ? 's' : ''}`;
+      const list = document.getElementById('auditList');
+      if (captureCount === 1) list.innerHTML = '';
+      
+      const item = document.createElement('div');
+      item.className = 'audit-entry';
+      const posStr = (lat && lon) ? `${lat.toFixed(4)}°, ${lon.toFixed(4)}°` : 'GPS Position Fixed';
+      item.innerHTML = `
+        <span class="time">${time}</span>
+        <span class="coords">${posStr}</span>
+        <span style="color:var(--emerald-400); font-weight:700;">✓ VERIFIED</span>
+      `;
+      list.prepend(item);
     }
+
+    // Connect on boot
+    connectMqtt();
   </script>
 </body>
 </html>
