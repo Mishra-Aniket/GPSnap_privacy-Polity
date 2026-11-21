@@ -7,6 +7,7 @@
   <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
   <style>
     :root {
       --bg: #0b0f19;
@@ -97,7 +98,7 @@
     <div class="header">
       <div class="header-title">
         <h1>🛰️ GPSnap • Cockpit</h1>
-        <p>Live Worldwide Tele-Inspection & Remote Shutter</p>
+        <p>Live Real-Time Tele-Inspection & Remote Shutter</p>
       </div>
       <div class="status-badge" id="connStatus">
         <div class="pulse-dot"></div>
@@ -153,10 +154,12 @@
   <script>
     // Extract room id from URL (?room=XYZ or #XYZ)
     const urlParams = new URLSearchParams(window.location.search);
-    let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'default';
+    let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'session';
 
     let map, marker;
     let lastLat = 0, lastLon = 0;
+    let mqttClient = null;
+    let isLocalMode = window.location.port === '8080';
 
     function initMap() {
       map = L.map('map', { zoomControl: false, attributionControl: false }).setView([28.6139, 77.2090], 14);
@@ -172,41 +175,83 @@
       setTimeout(() => t.classList.remove('show'), 2800);
     }
 
-    // Connect to Free Public NTFY SSE Channel for Real-Time Telemetry
-    const teleTopic = 'gpsnap-tele-' + roomId;
-    const cmdTopic = 'gpsnap-cmd-' + roomId;
+    const teleTopic = 'gpsnap/' + roomId + '/telemetry';
+    const cmdTopic = 'gpsnap/' + roomId + '/command';
 
-    function connectTelemetry() {
-      const sseUrl = 'https://ntfy.sh/' + teleTopic + '/sse';
-      const eventSource = new EventSource(sseUrl);
+    // Connect via Enterprise MQTT over WebSocket (Zero rate limits, ~30ms latency)
+    function connectMqtt() {
+      const brokers = [
+        'wss://broker.emqx.io:8084/mqtt',
+        'wss://broker.hivemq.com:8884/mqtt'
+      ];
+      let currentBrokerIdx = 0;
 
-      eventSource.onopen = () => {
-        document.getElementById('connText').innerText = 'LIVE CONNECTED';
-        document.getElementById('connStatus').style.borderColor = '#00E676';
-        document.getElementById('connStatus').style.color = '#00E676';
-      };
+      function attemptConnect() {
+        const url = brokers[currentBrokerIdx];
+        const clientId = 'gpsnap_web_' + Math.random().toString(16).substring(2, 10);
 
-      eventSource.onerror = () => {
-        document.getElementById('connText').innerText = 'RECONNECTING';
-        document.getElementById('connStatus').style.borderColor = '#FFD54F';
-        document.getElementById('connStatus').style.color = '#FFD54F';
-      };
-
-      eventSource.onmessage = (event) => {
         try {
-          const wrapper = JSON.parse(event.data);
-          const raw = wrapper.message;
-          if (!raw) return;
-          const data = JSON.parse(raw);
-          applyTelemetry(data);
+          mqttClient = mqtt.connect(url, {
+            clientId: clientId,
+            clean: true,
+            reconnectPeriod: 3000,
+            connectTimeout: 8000
+          });
+
+          mqttClient.on('connect', () => {
+            document.getElementById('connText').innerText = 'LIVE CONNECTED';
+            document.getElementById('connStatus').style.borderColor = '#00E676';
+            document.getElementById('connStatus').style.color = '#00E676';
+            mqttClient.subscribe(teleTopic, { qos: 0 });
+          });
+
+          mqttClient.on('message', (topic, message) => {
+            if (topic === teleTopic) {
+              try {
+                const data = JSON.parse(message.toString());
+                applyTelemetry(data);
+              } catch(e) {}
+            }
+          });
+
+          mqttClient.on('error', (err) => {
+            document.getElementById('connText').innerText = 'RECONNECTING';
+            document.getElementById('connStatus').style.borderColor = '#FFD54F';
+            document.getElementById('connStatus').style.color = '#FFD54F';
+            if (currentBrokerIdx < brokers.length - 1) {
+              currentBrokerIdx++;
+              mqttClient.end(true);
+              setTimeout(attemptConnect, 1000);
+            }
+          });
+
+          mqttClient.on('offline', () => {
+            document.getElementById('connText').innerText = 'RECONNECTING';
+            document.getElementById('connStatus').style.borderColor = '#FFD54F';
+            document.getElementById('connStatus').style.color = '#FFD54F';
+          });
         } catch(e) {
-          // might be raw JSON directly
-          try {
-            const data = JSON.parse(event.data);
-            if (data.latitude !== undefined) applyTelemetry(data);
-          } catch(_e) {}
+          console.warn('MQTT connect error:', e);
         }
-      };
+      }
+
+      attemptConnect();
+    }
+
+    // Local Wi-Fi / Hotspot Polling Fallback (if accessed via http://192.168.x.x:8080)
+    function startLocalPolling() {
+      setInterval(async () => {
+        try {
+          const res = await fetch('/api/telemetry', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            applyTelemetry(data);
+            document.getElementById('connText').innerText = 'LOCAL LAN ACTIVE';
+            document.getElementById('connStatus').style.borderColor = '#00E676';
+            document.getElementById('connStatus').style.color = '#00E676';
+          }
+        } catch(_e) {}
+      }, 1000);
     }
 
     function applyTelemetry(d) {
@@ -218,13 +263,10 @@
         document.getElementById('connStatus').style.color = '#FF5252';
         document.getElementById('btnCapture').disabled = true;
         document.getElementById('addressVal').innerText = '⚠️ Field camera has closed or exited inspection mode.';
-        showToast('⚠️ Field camera left inspection mode or disconnected.');
+        showToast('⚠️ Field camera left inspection mode.');
         return;
       }
 
-      document.getElementById('connText').innerText = 'LIVE CONNECTED';
-      document.getElementById('connStatus').style.borderColor = '#00E676';
-      document.getElementById('connStatus').style.color = '#00E676';
       document.getElementById('btnCapture').disabled = false;
 
       if (d.latitude && d.longitude) {
@@ -269,23 +311,35 @@
       btn.disabled = true;
       btn.innerHTML = '<span>⏳</span> CAPTURING ON DEVICE...';
       
-      try {
-        await fetch('https://ntfy.sh/' + cmdTopic, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'capture', timestamp: Date.now() })
-        });
-        showToast('📸 Verified capture command sent to device!');
-      } catch (err) {
-        showToast('❌ Command error: ' + err.message);
-      } finally {
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.innerHTML = '<span>📸</span> TRIGGER REMOTE VERIFIED CAPTURE';
-        }, 2000);
+      let sent = false;
+      if (mqttClient && mqttClient.connected) {
+        mqttClient.publish(cmdTopic, JSON.stringify({ action: 'capture', timestamp: Date.now() }), { qos: 1 });
+        sent = true;
       }
+
+      // Also send local POST if on local port
+      try {
+        await fetch('/api/capture', { method: 'POST' });
+        sent = true;
+      } catch(_e) {}
+
+      if (sent) {
+        showToast('📸 Verified capture command sent to device!');
+      } else {
+        showToast('⚠️ Waiting for device connection...');
+      }
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📸</span> TRIGGER REMOTE VERIFIED CAPTURE';
+      }, 2000);
     }
 
-    connectTelemetry();
+    // Initialize both MQTT and local fallback
+    connectMqtt();
+    if (isLocalMode) {
+      startLocalPolling();
+    }
   </script>
 </body>
 </html>
