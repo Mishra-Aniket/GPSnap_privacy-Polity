@@ -173,21 +173,44 @@
     }
 
     /* =========================================================================
-       2. TOP FLOATING "DYNAMIC ISLAND" (Clean Apple Pill with Unified Lat/Lon)
+       2. TOP FLOATING UNIFIED APPLE DYNAMIC NAVBAR (Zero Collision Flex Layout)
        ========================================================================= */
-    .gcs-dynamic-island {
+    .gcs-top-navbar, .gcs-dynamic-island {
       position: absolute;
-      top: 18px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 14px;
+      left: 18px;
+      right: 18px;
       z-index: 1000;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
       padding: 6px 16px;
       border-radius: 9999px;
       pointer-events: auto;
-      max-width: calc(100vw - 32px);
+      max-width: calc(100vw - 36px);
+    }
+    .gcs-nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .gcs-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .gcs-layer-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: var(--chip-bg);
+      border: var(--chip-border);
+      box-shadow: var(--chip-shadow);
+      padding: 2px 4px;
+      border-radius: 12px;
     }
 
     .gcs-brand-mark {
@@ -1282,29 +1305,34 @@
   <div id="map"></div>
 
   <!-- =========================================================================
-       2. TOP DYNAMIC ISLAND CAPSULE (Apple Liquid Glass with Unified Coordinates)
+       2. TOP UNIFIED DYNAMIC NAVBAR (Zero-Collision Apple Liquid Glass)
        ========================================================================= -->
-  <header class="gcs-glass-panel gcs-dynamic-island" id="dynamicIsland">
-    <!-- Brand Mark -->
-    <div class="gcs-brand-mark">
-      <div class="gcs-brand-logo">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-          <circle cx="12" cy="13" r="4"></circle>
-        </svg>
+  <header class="gcs-glass-panel gcs-top-navbar" id="dynamicIsland">
+    <!-- LEFT: Brand & Live Status & Room -->
+    <div class="gcs-nav-left">
+      <div class="gcs-brand-mark">
+        <div class="gcs-brand-logo">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+        <span class="gcs-brand-title">GPSNAP <span style="color:var(--neon-emerald); font-size:10px;">GCS</span></span>
       </div>
-      <span class="gcs-brand-title">GPSNAP <span style="color:var(--neon-emerald); font-size:10px;">GCS</span></span>
+
+      <div class="gcs-status-radar" id="connPill">
+        <div class="radar-pulse-dot"></div>
+        <span id="connStatusText">LINKED</span>
+      </div>
+
+      <!-- Channel Room Box -->
+      <div class="gcs-room-pill" title="Live Channel Room">
+        <span style="font-size:9px; font-weight:800; color:var(--text-tertiary);">ROOM</span>
+        <input type="text" id="roomInput" spellcheck="false" autocomplete="off" />
+      </div>
     </div>
 
-    <!-- Live Telemetry Status Radar -->
-    <div class="gcs-status-radar" id="connPill">
-      <div class="radar-pulse-dot"></div>
-      <span id="connStatusText">LINKED</span>
-    </div>
-
-    <div class="gcs-island-divider"></div>
-
-    <!-- UNIFIED LATITUDE & LONGITUDE STRIP (Apple Style, Never Breaks Into Multi-lines) -->
+    <!-- CENTER: Unified Coords Strip -->
     <div class="gcs-coords-capsule" id="coordsStrip">
       <div class="gcs-coord-pair">
         <span class="gcs-coord-axis">LAT</span>
@@ -1318,11 +1346,20 @@
       <span class="gcs-acc-badge" id="hudAccuracy">±0.28m RTK FIXED</span>
     </div>
 
-    <div class="gcs-island-divider"></div>
+    <!-- RIGHT: Map Layers & System Controls (Unified, Impossible to Overlap) -->
+    <div class="gcs-nav-right">
+      <!-- Map Layers Segmented Group -->
+      <div class="gcs-layer-group" id="mapControls">
+        <button class="gcs-layer-btn active" id="btnLayerSat" onclick="setMapLayer('sat')">🛰️ Satellite</button>
+        <button class="gcs-layer-btn" id="btnLayerStreets" onclick="setMapLayer('streets')">🗺️ Streets</button>
+        <button class="gcs-layer-btn" id="btnLayerOsm" onclick="setMapLayer('osm')">🌍 OSM</button>
+        <button class="gcs-layer-btn" id="btnMeasure" onclick="toggleMeasurementTool()" title="Measure Distance from Rover">📏 Measure</button>
+        <button class="gcs-layer-btn" onclick="recenterMap()" title="Focus on Rover (F)">🎯 Focus</button>
+      </div>
 
-    <!-- Island Actions: Zen HUD, Theme, Room, Share (Cleaned up: Live Cam moved to bottom!) -->
-    <div class="gcs-island-actions">
-      <!-- ZEN MODE (Hide/Show All HUDs) -->
+      <div class="gcs-island-divider"></div>
+
+      <!-- Island Actions: Zen HUD, Theme, Share -->
       <button class="gcs-btn-island-pill" onclick="toggleZenMode()" title="Toggle Zen Fullscreen Map (H)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -1331,19 +1368,11 @@
         <span>HUD</span>
       </button>
 
-      <!-- Theme Switcher (Jet Black & Light Mode) -->
       <button class="gcs-btn-island-pill" onclick="toggleTheme()" title="Switch Light Mode / Jet Black Mode">
         <span id="themeBtnIcon">☀️</span>
         <span id="themeBtnText">Light</span>
       </button>
 
-      <!-- Channel Room Box -->
-      <div class="gcs-room-pill" title="Live Channel Room">
-        <span style="font-size:9px; font-weight:800; color:var(--text-tertiary);">ROOM</span>
-        <input type="text" id="roomInput" spellcheck="false" autocomplete="off" />
-      </div>
-
-      <!-- Share Button -->
       <button class="gcs-btn-icon" onclick="copySessionLink()" title="Copy Share Link">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -1352,17 +1381,6 @@
       </button>
     </div>
   </header>
-
-  <!-- =========================================================================
-       3. TOP-RIGHT MAP CONTROLS & RANGE MEASURE CAPSULE
-       ========================================================================= -->
-  <div class="gcs-glass-panel gcs-map-controls-pill" id="mapControls">
-    <button class="gcs-layer-btn active" id="btnLayerSat" onclick="setMapLayer('sat')">🛰️ Satellite</button>
-    <button class="gcs-layer-btn" id="btnLayerStreets" onclick="setMapLayer('streets')">🗺️ Streets</button>
-    <button class="gcs-layer-btn" id="btnLayerOsm" onclick="setMapLayer('osm')">🌍 OSM</button>
-    <button class="gcs-layer-btn" id="btnMeasure" onclick="toggleMeasurementTool()" title="Measure Distance from Rover">📏 Measure</button>
-    <button class="gcs-layer-btn" onclick="recenterMap()" title="Focus on Rover (F)">🎯 Focus</button>
-  </div>
 
   <!-- =========================================================================
        4. LEFT FLOATING AVIONICS & POLAR SATELLITE RADAR HUD
