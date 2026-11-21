@@ -82,7 +82,7 @@
     }
 
     /* =========================================================================
-       1. 100% FULLSCREEN IMMERSIVE SATELLITE MAP (DJI / SpaceX Ground Control)
+       1. 100% FULLSCREEN IMMERSIVE SATELLITE MAP
        ========================================================================= */
     #map {
       position: absolute;
@@ -109,7 +109,7 @@
     }
 
     /* =========================================================================
-       2. TOP FLOATING "DYNAMIC ISLAND" CAPSULE (Center-Top)
+       2. TOP FLOATING "DYNAMIC ISLAND" CAPSULE
        ========================================================================= */
     .gcs-dynamic-island {
       position: absolute;
@@ -332,7 +332,7 @@
     }
 
     /* =========================================================================
-       4. LEFT FLOATING AVIONICS & POLAR SATELLITE RADAR HUD (Hideable/Collapsible)
+       4. LEFT FLOATING AVIONICS & POLAR SATELLITE RADAR HUD
        ========================================================================= */
     .gcs-hud-drawer {
       position: absolute;
@@ -407,12 +407,12 @@
       gap: 4px;
     }
 
-    /* Polar Radar Scope Canvas */
+    /* Polar Radar Scope Canvas with Animated Sweeping Beam */
     .polar-radar-container {
       position: relative;
       width: 100%;
       height: 160px;
-      background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, rgba(0, 0, 0, 0.7) 75%);
+      background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, rgba(0, 0, 0, 0.75) 75%);
       border: 1px solid var(--glass-border);
       border-radius: 12px;
       overflow: hidden;
@@ -464,7 +464,7 @@
       height: 14px;
       background: var(--neon-rose);
       transform-origin: center center;
-      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .gcs-mini-matrix {
@@ -505,7 +505,7 @@
       position: absolute;
       top: 75px;
       right: 20px;
-      width: 380px;
+      width: 400px;
       z-index: 1050;
       border-radius: 18px;
       display: none;
@@ -570,7 +570,7 @@
     .gcs-fpv-screen-box {
       position: relative;
       width: 100%;
-      height: 240px;
+      height: 250px;
       background: #000;
       overflow: hidden;
       display: flex;
@@ -586,6 +586,22 @@
       height: 100%;
       object-fit: contain;
       display: block;
+      transition: opacity 0.15s ease;
+    }
+
+    /* Shutter Flash Animation overlay */
+    .shutter-flash-overlay {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 25;
+      transition: opacity 0.25s ease-out;
+    }
+    .shutter-flash-overlay.flashing {
+      opacity: 0.9;
+      transition: none;
     }
 
     /* Drone HUD Reticle Overlay inside Viewfinder */
@@ -597,14 +613,15 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      z-index: 10;
     }
     .fpv-reticle-crosshair {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       border: 1px solid rgba(16, 185, 129, 0.4);
       border-radius: 50%;
       pointer-events: none;
@@ -627,41 +644,86 @@
       width: 1px;
       background: rgba(16, 185, 129, 0.6);
     }
+
+    /* Dynamic Artificial Horizon Line (Gyroscopic Tilt & Pitch) */
+    .fpv-artificial-horizon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 160px;
+      height: 50px;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: transform 0.12s linear;
+    }
+    .horizon-bar-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1.5px;
+      background: rgba(16, 185, 129, 0.65);
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+    }
+    .horizon-bar-line::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: -3.5px;
+      transform: translateX(-50%);
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+    .pitch-ladder-label {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 8px;
+      font-family: ui-monospace, monospace;
+      color: rgba(16, 185, 129, 0.85);
+      font-weight: 800;
+    }
+    .pitch-ladder-label.top { top: 4px; }
+    .pitch-ladder-label.bot { bottom: 4px; }
+
     .fpv-bracket-tl {
-      position: absolute; top: 12px; left: 12px; width: 14px; height: 14px;
+      position: absolute; top: 10px; left: 10px; width: 14px; height: 14px;
       border-top: 2px solid var(--neon-emerald); border-left: 2px solid var(--neon-emerald);
     }
     .fpv-bracket-tr {
-      position: absolute; top: 12px; right: 12px; width: 14px; height: 14px;
+      position: absolute; top: 10px; right: 10px; width: 14px; height: 14px;
       border-top: 2px solid var(--neon-emerald); border-right: 2px solid var(--neon-emerald);
     }
     .fpv-bracket-bl {
-      position: absolute; bottom: 12px; left: 12px; width: 14px; height: 14px;
+      position: absolute; bottom: 10px; left: 10px; width: 14px; height: 14px;
       border-bottom: 2px solid var(--neon-emerald); border-left: 2px solid var(--neon-emerald);
     }
     .fpv-bracket-br {
-      position: absolute; bottom: 12px; right: 12px; width: 14px; height: 14px;
+      position: absolute; bottom: 10px; right: 10px; width: 14px; height: 14px;
       border-bottom: 2px solid var(--neon-emerald); border-right: 2px solid var(--neon-emerald);
     }
 
     .fpv-hud-top-bar {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-family: ui-monospace, monospace;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
       color: #fff;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
     }
     .fpv-hud-bot-bar {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
       font-family: ui-monospace, monospace;
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 700;
       color: #fff;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
     }
 
     .fpv-standby-placeholder {
@@ -686,7 +748,7 @@
     }
 
     /* =========================================================================
-       6. BOTTOM FLOATING MISSION COMMAND CENTER CAPSULE (Center-Bottom)
+       6. BOTTOM FLOATING MISSION COMMAND CENTER CAPSULE
        ========================================================================= */
     .gcs-command-center {
       position: absolute;
@@ -1066,6 +1128,7 @@
       transform-origin: bottom center;
       pointer-events: none;
       filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* Measurement Distance Tooltip */
@@ -1120,7 +1183,7 @@
   <div id="map"></div>
 
   <!-- =========================================================================
-       2. TOP DYNAMIC ISLAND CAPSULE (SpaceX / Apple Glass Style)
+       2. TOP DYNAMIC ISLAND CAPSULE
        ========================================================================= -->
   <header class="gcs-glass-panel gcs-dynamic-island" id="dynamicIsland">
     <!-- Brand -->
@@ -1219,7 +1282,7 @@
       </div>
     </div>
 
-    <!-- Polar Radar Canvas: Plots actual satellites in orbit -->
+    <!-- Polar Radar Canvas: Plots actual satellites in orbit with animated sweep -->
     <div class="polar-radar-container">
       <canvas id="radarCanvas" width="290" height="160"></canvas>
       <div class="radar-stats-overlay">
@@ -1304,7 +1367,7 @@
       <!-- Window Actions -->
       <div style="display:flex; align-items:center; gap:4px;">
         <button class="gcs-btn-icon" onclick="toggleFpvFullscreen()" title="Toggle Fullscreen" style="width:22px; height:22px;">⛶</button>
-        <button class="gcs-btn-icon" onclick="toggleFpvWindow()" title="Close Live View (Zero BG Consumption)" style="width:22px; height:22px;">✕</button>
+        <button class="gcs-btn-icon" onclick="toggleFpvWindow()" title="Close Live View" style="width:22px; height:22px;">✕</button>
       </div>
     </div>
 
@@ -1313,24 +1376,34 @@
       <!-- Live Video / Photo Image -->
       <img id="fpvFeedImage" alt="Live FPV Camera Feed" style="display:none;" />
 
+      <!-- Shutter Flash Overlay Animation -->
+      <div class="shutter-flash-overlay" id="shutterFlash"></div>
+
       <!-- Standby Graphic when waiting for stream -->
       <div class="fpv-standby-placeholder" id="fpvStandby">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--neon-emerald)" stroke-width="1.8" class="spin" style="opacity:0.8;">
           <circle cx="12" cy="12" r="10"></circle>
           <path d="M12 2a10 10 0 0 1 10 10"></path>
         </svg>
-        <span style="font-size:11.5px; font-weight:800; color:var(--text-primary);">AWAITING FIELD CAMERA FEED</span>
-        <span style="font-size:9.5px; max-width:260px; line-height:1.4;">Live frames only stream when requested to save battery and network data.</span>
+        <span style="font-size:11.5px; font-weight:800; color:var(--text-primary);">CONNECTING FIELD CAMERA FEED</span>
+        <span style="font-size:9.5px; max-width:270px; line-height:1.4;">Live frames stream when the updated app is running on device.</span>
         <button class="btn-gcs-sub" onclick="requestLiveStream()" style="margin-top:6px; font-size:10.5px; padding:6px 12px;">📡 Request Stream Now</button>
       </div>
 
-      <!-- Drone Sci-Fi HUD Reticle Overlay -->
+      <!-- Drone Sci-Fi HUD Reticle Overlay with Gyroscopic Horizon Ladder -->
       <div class="fpv-hud-overlay" id="fpvReticleOverlay">
         <div class="fpv-bracket-tl"></div>
         <div class="fpv-bracket-tr"></div>
         <div class="fpv-bracket-bl"></div>
         <div class="fpv-bracket-br"></div>
         <div class="fpv-reticle-crosshair"></div>
+
+        <!-- Gyroscopic Artificial Horizon Line (Tilts with Phone Movement) -->
+        <div class="fpv-artificial-horizon" id="fpvHorizonLadder">
+          <div class="pitch-ladder-label top">+10°</div>
+          <div class="horizon-bar-line"></div>
+          <div class="pitch-ladder-label bot">-10°</div>
+        </div>
 
         <div class="fpv-hud-top-bar">
           <span id="fpvHudCoords">25.39217° N, 81.88324° E</span>
@@ -1592,7 +1665,6 @@
       currentTheme = (currentTheme === 'jetblack') ? 'light' : 'jetblack';
       localStorage.setItem('gpsnap_theme', currentTheme);
       applyTheme(currentTheme);
-      drawPolarRadar();
     }
 
     function applyTheme(theme) {
@@ -1690,7 +1762,7 @@
       }
     }
 
-    // 5. LIVE FPV CAMERA & PHOTO VIEW ENGINE (On-Demand: Zero background data!)
+    // 5. LIVE FPV CAMERA & PHOTO VIEW ENGINE
     let isFpvActive = false;
     let fpvMode = 'live'; // 'live' or 'photo'
     let lastPhotoData = null;
@@ -1705,23 +1777,13 @@
       if (isFpvActive) {
         win.classList.add('active');
         btn.classList.add('active');
-        // Start listening to viewfinder topic ONLY when window is opened!
-        if (mqttClient && mqttClient.connected) {
-          mqttClient.subscribe(vfTopic, { qos: 0 });
-          requestLiveStream();
-        }
-        showToast('📹 Live FPV Cam activated (Listening)');
+        setFpvMode('live');
+        requestLiveStream();
+        showToast('📹 Live FPV Cam activated');
       } else {
         win.classList.remove('active');
         btn.classList.remove('active');
-        // Unsubscribe from viewfinder topic to stop processing frames in background!
-        if (mqttClient && mqttClient.connected) {
-          mqttClient.unsubscribe(vfTopic);
-          mqttClient.publish(cmdTopic, JSON.stringify({ action: 'stream_stop' }), { qos: 0 });
-        }
-        document.getElementById('fpvFeedImage').style.display = 'none';
-        document.getElementById('fpvStandby').style.display = 'flex';
-        showToast('Live Cam closed (Zero background consumption)');
+        showToast('Live Cam closed');
       }
     }
 
@@ -1764,7 +1826,6 @@
     function requestLiveStream() {
       if (mqttClient && mqttClient.connected) {
         mqttClient.publish(cmdTopic, JSON.stringify({ action: 'stream_start', time: Date.now() }), { qos: 1 });
-        showToast('📡 Request sent to field camera for live feed');
       }
     }
 
@@ -1808,7 +1869,7 @@
         layers: [baseLayers['sat']]
       }).setView([currentLat, currentLon], 16);
 
-      // Custom Directional Marker (Radar Ping + Center Dot + FOV Cone)
+      // Custom Directional Marker (Radar Ping + Center Dot + Smooth FOV Cone)
       const markerHtml = `
         <div class="field-marker-container">
           <div class="field-marker-cone" id="markerCone"></div>
@@ -1916,8 +1977,18 @@
       }
     }
 
-    // 7. Polar Satellite Constellation Radar Visualizer
-    function drawPolarRadar() {
+    // 7. Polar Satellite Constellation Radar Visualizer with Smooth Sweep Animation
+    let radarSweepAngle = 0;
+    function startRadarAnimation() {
+      function renderLoop() {
+        radarSweepAngle = (radarSweepAngle + 1.2) % 360;
+        drawPolarRadar(radarSweepAngle);
+        requestAnimationFrame(renderLoop);
+      }
+      requestAnimationFrame(renderLoop);
+    }
+
+    function drawPolarRadar(sweepDeg = 0) {
       const cvs = document.getElementById('radarCanvas');
       if (!cvs) return;
       const ctx = cvs.getContext('2d');
@@ -1961,6 +2032,20 @@
       ctx.fillText('S', cx, cy + maxR - 8);
       ctx.fillText('E', cx + maxR - 8, cy);
       ctx.fillText('W', cx - maxR + 8, cy);
+
+      // Animated 360° Military Radar Sweep Beam
+      const sweepRad = (sweepDeg * Math.PI) / 180;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, maxR, sweepRad - 0.5, sweepRad);
+      ctx.closePath();
+      const beamGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, maxR);
+      beamGrad.addColorStop(0, 'rgba(16, 185, 129, 0.05)');
+      beamGrad.addColorStop(1, 'rgba(16, 185, 129, 0.35)');
+      ctx.fillStyle = beamGrad;
+      ctx.fill();
+      ctx.restore();
 
       // Orbital Satellites (GPS, Galileo, BeiDou, GLONASS, NavIC)
       const mockSats = [
@@ -2102,7 +2187,7 @@
       setTimeout(() => t.classList.remove('active'), 2800);
     }
 
-    // 11. Enterprise MQTT Communication
+    // 11. Enterprise MQTT Communication (Always ready for telemetry, photo & live stream)
     const teleTopic = 'gpsnap/' + roomId + '/telemetry';
     const cmdTopic = 'gpsnap/' + roomId + '/command';
     let mqttClient = null;
@@ -2124,7 +2209,7 @@
           mqttClient = mqtt.connect(brokers[currentBroker], {
             clientId: clientId,
             clean: true,
-            reconnectPeriod: 3000,
+            reconnectPeriod: 2500,
             connectTimeout: 8000
           });
 
@@ -2132,11 +2217,11 @@
             document.getElementById('connStatusText').innerText = 'LINKED';
             document.getElementById('connPill').style.borderColor = 'rgba(16, 185, 129, 0.4)';
             document.getElementById('connPill').style.color = '#10b981';
+            
+            // Subscribe to all essential topics immediately
             mqttClient.subscribe(teleTopic, { qos: 0 });
             mqttClient.subscribe(photoTopic, { qos: 0 });
-            if (isFpvActive) {
-              mqttClient.subscribe(vfTopic, { qos: 0 });
-            }
+            mqttClient.subscribe(vfTopic, { qos: 0 });
           });
 
           mqttClient.on('message', (topic, message) => {
@@ -2151,13 +2236,10 @@
                 handlePhotoReceived(photoData);
               } catch(e) {}
             } else if (topic === vfTopic) {
-              // Crucial: Only process viewfinder frames when user has actively opened FPV window!
-              if (isFpvActive && fpvMode === 'live') {
-                try {
-                  const vfData = JSON.parse(message.toString());
-                  handleViewfinderFrame(vfData);
-                } catch(e) {}
-              }
+              try {
+                const vfData = JSON.parse(message.toString());
+                handleViewfinderFrame(vfData);
+              } catch(e) {}
             }
           });
 
@@ -2182,7 +2264,7 @@
       attempt();
     }
 
-    // 12. Real-Time Telemetry Application
+    // 12. Real-Time Telemetry Application & Camera Horizon Tilt
     function applyTelemetry(d) {
       if (!d) return;
 
@@ -2223,7 +2305,7 @@
         triggerReverseGeocoding(d.latitude, d.longitude);
       }
 
-      // Heading & Spatial Orientation
+      // Heading & Spatial Orientation (Rotates cone on map & compass ribbon)
       if (d.heading !== undefined) {
         currentHeading = d.heading;
         const dir = d.headingDirection || '';
@@ -2234,8 +2316,14 @@
         updateMarkerHeading(d.heading);
       }
 
+      // Gyroscopic Pitch & Roll: Tilts the Artificial Horizon Ladder in Live Viewfinder!
       if (d.pitch !== undefined && d.roll !== undefined) {
         document.getElementById('hudOrientation').innerText = `P: ${Math.round(d.pitch)}° • R: ${Math.round(d.roll)}°`;
+        const horizon = document.getElementById('fpvHorizonLadder');
+        if (horizon) {
+          const pitchClamped = Math.max(-28, Math.min(28, d.pitch * 0.7));
+          horizon.style.transform = `translate(-50%, calc(-50% + ${pitchClamped}px)) rotate(${d.roll}deg)`;
+        }
       }
 
       // Satellites
@@ -2290,6 +2378,7 @@
       // Capture Confirmation Event
       if (d.event === 'captured') {
         playShutterSound();
+        triggerShutterFlashAnimation();
         showToast('✅ Photo stamped & saved on device!');
       }
     }
@@ -2297,8 +2386,9 @@
     // 13. High-Res Photo & Viewfinder Frame Handlers
     function handleViewfinderFrame(vf) {
       if (!vf || !vf.image) return;
-      if (isFpvActive && fpvMode === 'live') {
-        const img = document.getElementById('fpvFeedImage');
+      
+      const img = document.getElementById('fpvFeedImage');
+      if (fpvMode === 'live') {
         img.src = vf.image;
         img.style.display = 'block';
         document.getElementById('fpvStandby').style.display = 'none';
@@ -2306,19 +2396,28 @@
       }
     }
 
+    function triggerShutterFlashAnimation() {
+      const flash = document.getElementById('shutterFlash');
+      if (flash) {
+        flash.classList.add('flashing');
+        setTimeout(() => flash.classList.remove('flashing'), 120);
+      }
+    }
+
     function handlePhotoReceived(photoData) {
       if (!photoData) return;
       playShutterSound();
+      triggerShutterFlashAnimation();
       lastPhotoData = photoData;
 
       document.getElementById('btnDownloadPhoto').disabled = false;
 
-      // Automatically open FPV window on photo tab if closed or requested
+      // If FPV window is closed, open it
       if (!isFpvActive) {
         toggleFpvWindow();
       }
-      setFpvMode('photo');
-      showToast('📸 Verified inspection photo received!');
+      
+      showToast('📸 Verified inspection photo received! (Click tab to view)');
     }
 
     // 14. Remote Shutter Trigger Action
@@ -2331,6 +2430,8 @@
         </svg>
         <span>TRANSMITTING...</span>
       `;
+
+      triggerShutterFlashAnimation();
 
       let sent = false;
       if (mqttClient && mqttClient.connected) {
@@ -2385,8 +2486,7 @@
 
     // Boot GCS Engine
     initMap();
-    drawPolarRadar();
-    window.addEventListener('resize', drawPolarRadar);
+    startRadarAnimation();
     connectMqtt();
   </script>
 </body>
