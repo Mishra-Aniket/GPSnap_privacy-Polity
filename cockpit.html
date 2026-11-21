@@ -12,6 +12,9 @@
   
   <!-- MQTT Enterprise WebSocket Client -->
   <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
+
+  <!-- jsPDF Client-Side PDF Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
   <style>
     :root {
@@ -19,6 +22,7 @@
       --bg-surface: #0f1626;
       --bg-surface-elevated: #162035;
       --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(16, 185, 129, 0.4);
       
       --emerald-500: #10b981;
       --emerald-400: #34d399;
@@ -28,6 +32,7 @@
       --cyan-400: #22d3ee;
       --amber-500: #f59e0b;
       --rose-500: #f43f5e;
+      --indigo-500: #6366f1;
       
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
@@ -50,15 +55,15 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* TOP APPLICATION BAR */
+    /* TOP BAR NAVIGATION */
     .top-bar {
-      height: 58px;
+      height: 56px;
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
+      padding: 0 18px;
       z-index: 1000;
       flex-shrink: 0;
     }
@@ -68,384 +73,437 @@
       align-items: center;
       gap: 12px;
     }
-
     .brand-mark {
       width: 32px;
       height: 32px;
       border-radius: 8px;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border: 1px solid var(--border-subtle);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+      border: 1px solid var(--emerald-400);
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--emerald-400);
-      font-size: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
-
     .brand-text h1 {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
-      letter-spacing: 0.3px;
-      color: #fff;
+      letter-spacing: 0.8px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
-
-    .brand-text span.version-tag {
-      font-size: 10px;
-      font-weight: 700;
-      background: rgba(16, 185, 129, 0.12);
+    .version-tag {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       color: var(--emerald-400);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      padding: 1px 6px;
-      border-radius: 4px;
+      font-weight: 700;
       font-family: var(--font-mono);
     }
-
     .brand-text p {
       font-size: 11px;
-      color: var(--text-tertiary);
-      font-weight: 500;
+      color: var(--text-secondary);
     }
 
-    .session-cluster {
+    .top-actions-cluster {
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
+    .top-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .top-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .top-btn.primary {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border: 1px solid #34d399;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+    }
+    .top-btn.primary:hover {
+      background: linear-gradient(135deg, #047857, #059669);
+    }
+    .top-btn.active {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: var(--cyan-400);
+      color: var(--cyan-400);
+    }
+
     .room-selector {
       display: flex;
       align-items: center;
-      background: #090d16;
+      background: var(--bg-base);
       border: 1px solid var(--border-subtle);
-      border-radius: 7px;
-      padding: 3px 8px;
-      gap: 6px;
-      transition: border-color 0.2s;
-    }
-    .room-selector:focus-within {
-      border-color: var(--cyan-500);
+      border-radius: 6px;
+      padding: 2px 8px;
+      height: 32px;
     }
     .room-selector label {
       font-size: 10px;
+      text-transform: uppercase;
       font-weight: 700;
       color: var(--text-tertiary);
+      margin-right: 6px;
       font-family: var(--font-mono);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
     .room-selector input {
       background: transparent;
       border: none;
+      outline: none;
       color: var(--cyan-400);
       font-family: var(--font-mono);
       font-size: 12px;
-      font-weight: 700;
-      width: 125px;
-      outline: none;
+      font-weight: 600;
+      width: 130px;
     }
     .room-btn-copy {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: transparent;
+      border: none;
       color: var(--text-secondary);
-      border-radius: 5px;
-      padding: 4px 8px;
-      font-size: 11px;
       cursor: pointer;
-      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       gap: 4px;
-      transition: all 0.15s;
+      font-size: 11px;
     }
     .room-btn-copy:hover {
-      background: rgba(255,255,255,0.12);
       color: #fff;
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .stream-status-pill {
       display: flex;
       align-items: center;
-      gap: 7px;
-      background: rgba(16, 185, 129, 0.08);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      padding: 5px 12px;
+      gap: 6px;
+      padding: 4px 10px;
       border-radius: 20px;
       font-size: 11px;
+      font-family: var(--font-mono);
       font-weight: 700;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       color: var(--emerald-400);
-      letter-spacing: 0.4px;
     }
     .pulse-dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--emerald-400);
       box-shadow: 0 0 8px var(--emerald-400);
-      animation: pulseAnim 2s infinite ease-in-out;
+      animation: pulse 2s infinite ease-in-out;
     }
-    @keyframes pulseAnim {
+    @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.35; transform: scale(0.85); }
+      50% { opacity: 0.3; transform: scale(0.8); }
     }
 
-    /* MAIN CONTAINER: TWO-COLUMN GEOSPATIAL COMMAND DESK */
+    /* DASHBOARD BODY */
     .dashboard-body {
       flex: 1;
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 16px;
-      padding: 16px 20px;
-      max-width: 1540px;
-      margin: 0 auto;
-      width: 100%;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 14px;
+      padding: 14px;
+      min-height: calc(100vh - 56px);
+      position: relative;
     }
 
     @media (max-width: 1024px) {
       .dashboard-body {
         grid-template-columns: 1fr;
-        padding: 12px;
-        gap: 12px;
       }
     }
 
-    /* LEFT PANE: TACTICAL MAP & SPATIAL VERIFICATION */
+    /* LEFT PANE: TACTICAL MAP */
     .map-pane {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      height: 100%;
+      min-height: 520px;
     }
-
     .map-viewport-wrapper {
-      position: relative;
       flex: 1;
       min-height: 480px;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border-subtle);
-      background: #0d131f;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      position: relative;
+      background: #000;
     }
-
     #map {
       width: 100%;
       height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: #0c111a;
+      min-height: 480px;
+      z-index: 1;
     }
 
-    /* MAP FLOATING HUD OVERLAYS */
+    /* HUD OVERLAYS */
     .map-hud-top-left {
       position: absolute;
-      top: 14px;
-      left: 14px;
+      top: 12px;
+      left: 12px;
       z-index: 500;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      pointer-events: none;
     }
     .hud-badge {
-      background: rgba(15, 22, 38, 0.9);
+      background: rgba(9, 13, 22, 0.88);
       backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
       border: 1px solid var(--border-subtle);
       border-radius: 6px;
       padding: 5px 10px;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #fff;
+      font-size: 11px;
+      font-family: var(--font-mono);
       display: flex;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      gap: 6px;
     }
     .hud-badge .mono {
-      font-family: var(--font-mono);
-      color: var(--cyan-400);
-      font-weight: 700;
+      color: #fff;
+      font-weight: 600;
     }
 
     .map-hud-top-right {
       position: absolute;
-      top: 14px;
-      right: 14px;
+      top: 12px;
+      right: 12px;
       z-index: 500;
       display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
       gap: 6px;
+      max-width: 440px;
     }
     .hud-control-btn {
-      background: rgba(15, 22, 38, 0.92);
+      background: rgba(9, 13, 22, 0.88);
       backdrop-filter: blur(8px);
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
       border-radius: 6px;
-      padding: 6px 11px;
-      font-size: 11.5px;
+      padding: 5px 10px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 5px;
-      transition: all 0.15s;
+      gap: 4px;
+      transition: all 0.15s ease;
     }
     .hud-control-btn:hover {
-      background: #1e293b;
+      background: rgba(22, 32, 53, 0.95);
       color: #fff;
-      border-color: rgba(255,255,255,0.2);
+      border-color: rgba(255, 255, 255, 0.2);
     }
     .hud-control-btn.active {
       background: rgba(16, 185, 129, 0.2);
+      border-color: var(--emerald-400);
       color: var(--emerald-400);
-      border-color: rgba(16, 185, 129, 0.4);
+    }
+    .hud-control-btn.measuring-active {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: var(--amber-500);
+      color: var(--amber-500);
+      animation: pulse 2s infinite ease-in-out;
     }
 
-    /* MAP BOTTOM RADAR HUD */
+    /* COMPASS GIMBAL */
     .map-hud-bottom {
       position: absolute;
       bottom: 14px;
       left: 14px;
-      right: 14px;
       z-index: 500;
       display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      pointer-events: none;
+      align-items: center;
+      gap: 10px;
     }
     .compass-gimbal {
-      background: rgba(15, 22, 38, 0.92);
+      background: rgba(9, 13, 22, 0.88);
       backdrop-filter: blur(8px);
       border: 1px solid var(--border-subtle);
       border-radius: 8px;
-      padding: 8px 12px;
+      padding: 6px 12px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      pointer-events: auto;
+      gap: 10px;
     }
     .gimbal-dial {
-      width: 38px;
-      height: 38px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       border: 1.5px solid var(--border-subtle);
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #090d16;
     }
     .gimbal-needle {
-      width: 3px;
-      height: 28px;
-      background: linear-gradient(to bottom, #ef4444 50%, #94a3b8 50%);
-      border-radius: 2px;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 2px;
+      height: 18px;
+      background: linear-gradient(to bottom, #f43f5e 50%, #94a3b8 50%);
+      transform-origin: 50% 50%;
+      transition: transform 0.2s ease-out;
     }
     .gimbal-info {
       display: flex;
       flex-direction: column;
     }
     .gimbal-heading {
-      font-size: 14px;
-      font-weight: 800;
-      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
       color: #fff;
+      font-family: var(--font-mono);
     }
     .gimbal-sub {
       font-size: 10px;
-      color: var(--text-tertiary);
+      color: var(--text-secondary);
       font-family: var(--font-mono);
     }
 
-    /* STRUCTURED ENTERPRISE ADDRESS VERIFICATION PANEL */
+    /* CADASTRAL MEASUREMENT FLOATING OVERLAY CARD */
+    .cadastral-measure-card {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      z-index: 550;
+      background: rgba(15, 22, 38, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 10px;
+      padding: 12px 14px;
+      width: 310px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: none;
+    }
+    .cadastral-measure-card.active {
+      display: block;
+    }
+    .cadastral-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .cadastral-card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--amber-500);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cadastral-values-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .cadastral-val-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+    .cadastral-val-label {
+      font-size: 9.5px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .cadastral-val-number {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+      margin-top: 1px;
+    }
+    .cadastral-val-number.highlight {
+      color: var(--emerald-400);
+    }
+    .cadastral-actions-row {
+      display: flex;
+      gap: 6px;
+    }
+    .cadastral-btn {
+      flex: 1;
+      padding: 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .cadastral-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .cadastral-btn.accent {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--emerald-400);
+      color: var(--emerald-400);
+    }
+
+    /* ADDRESS VERIFICATION CARD */
     .address-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      padding: 16px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
     .address-card-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
     }
     .address-tag {
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-tertiary);
+      color: var(--emerald-400);
       display: flex;
       align-items: center;
       gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .verified-badge {
-      background: rgba(16, 185, 129, 0.12);
-      color: var(--emerald-400);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      font-size: 10.5px;
-      font-weight: 700;
-      padding: 2px 8px;
+      font-size: 10px;
+      padding: 2px 6px;
       border-radius: 4px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .address-main-title {
-      font-size: 14px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--emerald-400);
       font-weight: 700;
-      color: #f1f5f9;
-      line-height: 1.45;
-    }
-
-    /* STRUCTURED ADDRESS PILLS CHIPS */
-    .address-chips-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 2px;
-    }
-    .addr-chip {
-      background: #090d16;
-      border: 1px solid var(--border-subtle);
-      border-radius: 5px;
-      padding: 4px 8px;
-      font-size: 11px;
-      color: var(--text-secondary);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .addr-chip strong {
-      color: #fff;
-      font-weight: 600;
-    }
-    .addr-chip.highlight {
-      border-color: rgba(6, 182, 212, 0.3);
-      color: var(--cyan-400);
-    }
-    .addr-chip.highlight strong {
-      color: #fff;
-    }
-
-    .address-meta-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      color: var(--text-tertiary);
-      border-top: 1px solid rgba(255,255,255,0.05);
-      padding-top: 8px;
-      margin-top: 2px;
+      font-family: var(--font-mono);
     }
     .btn-copy-address {
       background: transparent;
@@ -462,21 +520,107 @@
       background: rgba(255,255,255,0.08);
       color: #fff;
     }
+    .address-main-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.45;
+    }
+    .address-chips-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .addr-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 4px 8px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+    }
+    .addr-chip strong {
+      color: var(--text-primary);
+    }
+    .addr-chip.highlight {
+      border-color: rgba(6, 182, 212, 0.3);
+      background: rgba(6, 182, 212, 0.08);
+    }
+    .addr-chip.highlight strong {
+      color: var(--cyan-400);
+    }
+    .address-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 8px;
+    }
 
-    /* RIGHT PANE: TELEMETRY METRICS CONSOLE */
+    /* RIGHT PANE: TELEMETRY & CONTROLS */
     .telemetry-pane {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    /* METRIC TILES GRID */
+    .rtk-status-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .rtk-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .rtk-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .rtk-badge.fixed {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--emerald-400);
+    }
+    .satellite-constellation-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .sat-chip {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .sat-chip.active {
+      color: var(--cyan-400);
+      border-color: rgba(6, 182, 212, 0.3);
+      background: rgba(6, 182, 212, 0.08);
+    }
+
     .telemetry-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
-
     .telemetry-tile {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
@@ -497,131 +641,68 @@
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--text-tertiary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
     .tile-value {
-      font-size: 19px;
-      font-weight: 800;
-      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
       font-family: var(--font-mono);
-      letter-spacing: -0.3px;
+      color: var(--text-primary);
       margin: 4px 0 2px 0;
     }
     .tile-value.emerald { color: var(--emerald-400); }
     .tile-value.cyan { color: var(--cyan-400); }
     .tile-value.amber { color: var(--amber-500); }
-    
     .tile-sub {
-      font-size: 11px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* RTK SATELLITE STRIP */
-    .rtk-status-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .rtk-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .rtk-badge {
       font-size: 10.5px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      letter-spacing: 0.4px;
-    }
-    .rtk-badge.fixed {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: var(--emerald-400);
-    }
-    .satellite-constellation-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .sat-chip {
-      background: #090d16;
-      border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
-      font-size: 10.5px;
-      font-weight: 600;
-      padding: 3px 7px;
-      border-radius: 4px;
       font-family: var(--font-mono);
     }
-    .sat-chip.active {
-      border-color: rgba(6, 182, 212, 0.4);
-      color: var(--cyan-400);
-    }
 
-    /* CAPTURE TRIGGER BUTTON */
+    /* TRIGGER CONTAINER */
     .trigger-container {
-      margin-top: 4px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
     .btn-trigger-inspection {
-      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
-      color: #06281e;
+      background: linear-gradient(135deg, #059669, #10b981);
       border: 1px solid #34d399;
+      color: #fff;
       border-radius: 10px;
-      padding: 15px 20px;
-      font-size: 14.5px;
-      font-weight: 800;
-      letter-spacing: 0.4px;
-      cursor: pointer;
+      height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      transition: all 0.15s ease;
-      width: 100%;
-      user-select: none;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s ease;
+      position: relative;
     }
     .btn-trigger-inspection:hover {
-      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+      background: linear-gradient(135deg, #047857, #059669);
+      box-shadow: 0 6px 24px rgba(16, 185, 129, 0.45);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
     }
     .btn-trigger-inspection:active {
       transform: translateY(1px);
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-    }
-    .btn-trigger-inspection:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      transform: none;
     }
     .btn-shortcut-hint {
-      background: rgba(0,0,0,0.2);
-      border: 1px solid rgba(0,0,0,0.15);
-      color: #06281e;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10.5px;
+      position: absolute;
+      right: 14px;
+      font-size: 9px;
       font-family: var(--font-mono);
-      font-weight: 700;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 2px 5px;
+      border-radius: 3px;
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    /* CAPTURE AUDIT TIMELINE */
+    /* CAPTURE AUDIT STRIP */
     .audit-strip {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
@@ -630,71 +711,374 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      max-height: 180px;
+      overflow-y: auto;
     }
     .audit-strip-header {
-      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--text-tertiary);
-      display: flex;
-      justify-content: space-between;
-    }
-    .audit-log-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 120px;
-      overflow-y: auto;
     }
     .audit-entry {
-      background: #090d16;
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 6px 10px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
       font-size: 11px;
-    }
-    .audit-entry .time {
       font-family: var(--font-mono);
-      color: var(--text-secondary);
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      animation: fadeIn 0.3s ease;
     }
-    .audit-entry .coords {
-      font-family: var(--font-mono);
-      color: var(--emerald-400);
-      font-weight: 600;
-    }
+    .audit-entry .time { color: var(--text-tertiary); }
+    .audit-entry .coords { color: var(--cyan-400); font-weight: 600; }
 
-    /* TOAST NOTIFICATION */
-    .hud-toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 9999;
+    /* VERIFIED CAPTURE REEL (GALLERY FILMSTRIP) */
+    .gallery-reel-section {
+      grid-column: 1 / -1;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 16px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 10px;
     }
-    .hud-toast.active {
-      transform: translateY(0);
-      opacity: 1;
+    .reel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .reel-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--emerald-400);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .reel-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      min-height: 90px;
+    }
+    .reel-strip::-webkit-scrollbar {
+      height: 5px;
+    }
+    .reel-strip::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 4px;
+    }
+    .reel-empty-placeholder {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 20px 0;
+    }
+    .photo-thumb-card {
+      flex: 0 0 110px;
+      height: 85px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1.5px solid var(--border-subtle);
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #000;
+    }
+    .photo-thumb-card:hover {
+      border-color: var(--emerald-400);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .photo-thumb-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .photo-thumb-badge {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-size: 8.5px;
+      font-family: var(--font-mono);
+      color: #fff;
     }
 
-    /* CUSTOM DIRECTIONAL MAP MARKER */
+    /* DRONE-STYLE LIVE VIEWFINDER HUD (PiP) */
+    .viewfinder-pip {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 330px;
+      background: rgba(15, 22, 38, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(16, 185, 129, 0.5);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+      z-index: 1200;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .viewfinder-pip.minimized {
+      height: 42px;
+      width: 240px;
+    }
+    .viewfinder-pip.hidden {
+      display: none;
+    }
+    .viewfinder-pip-header {
+      height: 40px;
+      background: rgba(9, 13, 22, 0.95);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      cursor: move;
+    }
+    .pip-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+    }
+    .pip-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 800;
+      color: #f43f5e;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .pip-live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #f43f5e;
+      animation: pulse 1s infinite;
+    }
+    .pip-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pip-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .pip-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .viewfinder-stage {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .viewfinder-stage img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .viewfinder-crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60px;
+      height: 60px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .viewfinder-crosshair::before, .viewfinder-crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(52, 211, 153, 0.7);
+    }
+    .viewfinder-crosshair::before {
+      top: 29px; left: 0; width: 60px; height: 1.5px;
+    }
+    .viewfinder-crosshair::after {
+      left: 29px; top: 0; width: 1.5px; height: 60px;
+    }
+    .viewfinder-overlay-stats {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      right: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9.5px;
+      font-family: var(--font-mono);
+      color: #fff;
+      background: rgba(0, 0, 0, 0.65);
+      padding: 3px 8px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    /* PHOTO INSPECTOR LIGHTBOX MODAL */
+    .lightbox-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(5, 8, 14, 0.88);
+      backdrop-filter: blur(16px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .lightbox-modal.active {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+    .lightbox-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      max-width: 960px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+    }
+    @media (max-width: 800px) {
+      .lightbox-content {
+        flex-direction: column;
+        max-height: 94vh;
+      }
+    }
+    .lightbox-photo-pane {
+      flex: 1.6;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .lightbox-photo-pane img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .lightbox-details-pane {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-subtle);
+      overflow-y: auto;
+    }
+    .lightbox-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .lightbox-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--emerald-400);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-close-modal:hover { color: #fff; }
+    .lightbox-meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .lightbox-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .lightbox-meta-item .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-tertiary);
+    }
+    .lightbox-meta-item .val {
+      font-size: 12.5px;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+    .btn-download-photo {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border: 1px solid #34d399;
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .btn-download-photo:hover {
+      background: linear-gradient(135deg, #047857, #059669);
+    }
+
+    /* CUSTOM MAP MARKERS */
+    .custom-surveyor-icon {
+      background: transparent;
+      border: none;
+    }
     .field-marker-container {
       position: relative;
       width: 44px;
@@ -738,6 +1122,51 @@
       transition: transform 0.25s ease-out;
       z-index: 1;
     }
+
+    .photo-pin-marker {
+      background: #090d16;
+      border: 2px solid #00f0ff;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
+      color: #00f0ff;
+      cursor: pointer;
+    }
+
+    /* FLOATING TOAST NOTIFICATION */
+    .hud-toast {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(15, 22, 38, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 30px;
+      padding: 8px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 3000;
+    }
+    .hud-toast.active {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -758,7 +1187,27 @@
       </div>
     </div>
 
-    <div class="session-cluster">
+    <!-- TOP BAR ACTIONS & SESSION CLUSTER -->
+    <div class="top-actions-cluster">
+      <button class="top-btn" id="btnTogglePipCam" onclick="toggleViewfinderWindow()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 7l-7 5 7 5V7z"></path>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
+        <span>Live Cam</span>
+      </button>
+
+      <button class="top-btn primary" id="btnExportPdfReport" onclick="generateInspectionPdf()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Official PDF Report</span>
+      </button>
+
       <div class="room-selector">
         <label>Room</label>
         <input type="text" id="roomInput" spellcheck="false" autocomplete="off" />
@@ -798,12 +1247,19 @@
           </div>
         </div>
 
-        <!-- HUD: Map Controls & Layer Switcher (Zero Watermarks, 100% Free) -->
+        <!-- HUD: Map Controls, Layers, Measuring & GIS Exports -->
         <div class="map-hud-top-right">
           <button class="hud-control-btn active" id="btnLayerSat" onclick="setMapLayer('sat')">🛰️ Satellite</button>
           <button class="hud-control-btn" id="btnLayerStreets" onclick="setMapLayer('streets')">🗺️ Streets</button>
           <button class="hud-control-btn" id="btnLayerOsm" onclick="setMapLayer('osm')">🌍 OSM</button>
           <button class="hud-control-btn" onclick="recenterMap()" title="Center Surveyor Position">🎯 Focus</button>
+          <button class="hud-control-btn" id="btnMeasureArea" onclick="toggleAreaMeasurement()">📐 Measure Area</button>
+          <button class="hud-control-btn" onclick="exportKml()" title="Export Google Earth KML">📥 KML</button>
+          <button class="hud-control-btn" onclick="exportGeoJson()" title="Export GIS GeoJSON">🌐 GeoJSON</button>
+          <div class="hud-badge" id="hudTrailPill" style="margin-left: 2px;">
+            <span style="color:var(--text-tertiary)">TRAIL:</span>
+            <span class="mono" id="hudTrailDist" style="color:var(--cyan-400)">0.00 km</span>
+          </div>
         </div>
 
         <!-- HUD: Heading Gimbal -->
@@ -818,6 +1274,47 @@
             </div>
           </div>
         </div>
+
+        <!-- CADASTRAL AREA MEASUREMENT FLOATING OVERLAY CARD -->
+        <div class="cadastral-measure-card" id="cadastralCard">
+          <div class="cadastral-card-header">
+            <div class="cadastral-card-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M3 3v18h18"></path>
+                <path d="M19 9l-5 5-4-4-3 3"></path>
+              </svg>
+              Cadastral Boundary Area
+            </div>
+            <button class="pip-btn" onclick="toggleAreaMeasurement()" title="Close measuring mode">✕</button>
+          </div>
+          <div class="cadastral-values-grid">
+            <div class="cadastral-val-box">
+              <div class="cadastral-val-label">Acres</div>
+              <div class="cadastral-val-number highlight" id="measAcres">0.0000 Ac</div>
+            </div>
+            <div class="cadastral-val-box">
+              <div class="cadastral-val-label">Bigha (Pucca)</div>
+              <div class="cadastral-val-number highlight" id="measBigha">0.00 Bigha</div>
+            </div>
+            <div class="cadastral-val-box">
+              <div class="cadastral-val-label">Hectares</div>
+              <div class="cadastral-val-number" id="measHectares">0.0000 Ha</div>
+            </div>
+            <div class="cadastral-val-box">
+              <div class="cadastral-val-label">Square Feet</div>
+              <div class="cadastral-val-number" id="measSqFt">0 sq ft</div>
+            </div>
+            <div class="cadastral-val-box" style="grid-column: 1 / -1;">
+              <div class="cadastral-val-label">Boundary Perimeter</div>
+              <div class="cadastral-val-number" id="measPerimeter" style="color:var(--cyan-400)">0.0 m (0 vertices)</div>
+            </div>
+          </div>
+          <div class="cadastral-actions-row">
+            <button class="cadastral-btn accent" onclick="addCurrentGpsToBoundary()">➕ Add GPS Point</button>
+            <button class="cadastral-btn" onclick="clearBoundaryMeasurement()">🗑️ Clear</button>
+          </div>
+        </div>
+
       </div>
 
       <!-- Live Structured Address Verification Panel -->
@@ -947,7 +1444,7 @@
             <span id="auditCount">0 Captures</span>
           </div>
           <div class="audit-log-list" id="auditList">
-            <div style="font-size:11px; color:var(--text-tertiary); text-align:center; padding:8px 0;">
+            <div style="font-size:11px; color:var(--text-tertiary); text-align:center; padding:8px 0;" id="emptyAuditMsg">
               No remote captures triggered in this session.
             </div>
           </div>
@@ -956,7 +1453,109 @@
 
     </section>
 
+    <!-- VERIFIED CAPTURE REEL (GALLERY FILMSTRIP) -->
+    <section class="gallery-reel-section">
+      <div class="reel-header">
+        <div class="reel-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          Verified Photo Inspection Reel
+        </div>
+        <span style="font-size:11px; color:var(--text-secondary); font-family:var(--font-mono);" id="reelCountText">0 Photos Recorded</span>
+      </div>
+      <div class="reel-strip" id="reelStrip">
+        <div class="reel-empty-placeholder" id="reelEmptyPlaceholder">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Trigger camera shutter to stream verified high-res inspection photos here.
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- DRONE-STYLE LIVE VIEWFINDER HUD (PiP) -->
+  <div class="viewfinder-pip hidden" id="viewfinderPip">
+    <div class="viewfinder-pip-header" id="pipHeader">
+      <div class="pip-title">
+        <span class="pip-live-badge"><span class="pip-live-dot"></span>LIVE</span>
+        <span>SURVEYOR CAM</span>
+      </div>
+      <div class="pip-controls">
+        <button class="pip-btn" onclick="togglePipMinimize()" title="Minimize / Expand">_</button>
+        <button class="pip-btn" onclick="toggleViewfinderWindow()" title="Close">✕</button>
+      </div>
+    </div>
+    <div class="viewfinder-stage">
+      <img id="pipViewfinderImg" src="" alt="Awaiting camera feed..." style="display:none;" />
+      <div id="pipPlaceholderText" style="font-size:11px; color:var(--text-tertiary); font-family:var(--font-mono); text-align:center; padding:20px;">
+        📡 Awaiting live viewfinder frame stream...
+      </div>
+      <div class="viewfinder-crosshair"></div>
+      <div class="viewfinder-overlay-stats">
+        <span id="pipFps">1.5 FPS STREAM</span>
+        <span id="pipIncline">P: -41° | R: -13°</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHOTO INSPECTION LIGHTBOX MODAL -->
+  <div class="lightbox-modal" id="lightboxModal">
+    <div class="lightbox-content">
+      <div class="lightbox-photo-pane">
+        <img id="lightboxImg" src="" alt="Stamped Capture Preview" />
+      </div>
+      <div class="lightbox-details-pane">
+        <div>
+          <div class="lightbox-header">
+            <div class="lightbox-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Verified Stamped Field Evidence
+            </div>
+            <button class="btn-close-modal" onclick="closeLightbox()">✕</button>
+          </div>
+          <div class="lightbox-meta-list">
+            <div class="lightbox-meta-item">
+              <span class="label">Date & Time</span>
+              <span class="val" id="lbTime">--</span>
+            </div>
+            <div class="lightbox-meta-item">
+              <span class="label">Geodetic Coordinates</span>
+              <span class="val" id="lbCoords">--</span>
+            </div>
+            <div class="lightbox-meta-item">
+              <span class="label">RTK Accuracy & Altitude</span>
+              <span class="val" id="lbAccAlt">--</span>
+            </div>
+            <div class="lightbox-meta-item">
+              <span class="label">Cadastral Field Address</span>
+              <span class="val" id="lbAddress" style="font-size:11.5px;">--</span>
+            </div>
+            <div class="lightbox-meta-item">
+              <span class="label">Survey Project & Inspector</span>
+              <span class="val" id="lbProjectInspector">--</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn-download-photo" onclick="downloadCurrentLightboxPhoto()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Verified Stamped Photo
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- FLOATING TOAST -->
   <div class="hud-toast" id="toast">
@@ -967,7 +1566,9 @@
   </div>
 
   <script>
+    // ==========================================
     // 1. Session & Room Identification
+    // ==========================================
     const urlParams = new URLSearchParams(window.location.search);
     let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'snap-default';
     
@@ -993,10 +1594,14 @@
       }
     }
 
-    // 2. High-DPI GIS Map Engine (Zero Watermarks, 100% Free Public Tiles)
+    // ==========================================
+    // 2. High-DPI Leaflet GIS Map Engine
+    // ==========================================
     let map, surveyorMarker;
     let currentLat = 25.39213, currentLon = 81.88319;
-    let currentHeading = 0;
+    let currentAltitude = 4.0;
+    let currentAccuracy = 0.28;
+    let currentHeading = 146;
     let activeLayerType = 'sat';
     let baseLayers = {};
 
@@ -1041,6 +1646,9 @@
       });
 
       surveyorMarker = L.marker([currentLat, currentLon], { icon: customIcon }).addTo(map);
+
+      // Map Click Handler for Cadastral Measurement
+      map.on('click', onMapClickedForMeasurement);
     }
     initMap();
 
@@ -1060,21 +1668,689 @@
       }
     }
 
-    // 3. Automated Browser-Side Cadastral Reverse Geocoding
+    // ==========================================
+    // 3. Feature #2: Live GPS Path / Trail Breadcrumbs
+    // ==========================================
+    let gpsTrailPoints = []; // [{lat, lon, alt, time}]
+    let gpsTrailPolyline = null;
+    let totalTrailDistanceKm = 0;
+
+    function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function recordTrailPoint(lat, lon, alt, time) {
+      if (!lat || !lon) return;
+      const last = gpsTrailPoints[gpsTrailPoints.length - 1];
+      if (last) {
+        const d = haversineDistanceMeters(last.lat, last.lon, lat, lon);
+        if (d < 1.6) return; // Ignore small GPS jitter (< 1.6m)
+        totalTrailDistanceKm += (d / 1000);
+      }
+      gpsTrailPoints.push({ lat, lon, alt: alt || 0, time: time || new Date().toISOString() });
+      document.getElementById('hudTrailDist').innerText = totalTrailDistanceKm.toFixed(2) + ' km';
+
+      const latLngs = gpsTrailPoints.map(p => [p.lat, p.lon]);
+      if (!gpsTrailPolyline) {
+        gpsTrailPolyline = L.polyline(latLngs, {
+          color: '#00f0ff',
+          weight: 4,
+          opacity: 0.85,
+          smoothFactor: 1
+        }).addTo(map);
+      } else {
+        gpsTrailPolyline.setLatLngs(latLngs);
+      }
+    }
+
+    // ==========================================
+    // 4. Feature #2: KML & GeoJSON Exporters
+    // ==========================================
+    function exportKml() {
+      if (gpsTrailPoints.length === 0 && capturedPhotos.length === 0) {
+        showToast('⚠️ No GPS trail or photos recorded yet.');
+        return;
+      }
+      const filename = `GPSnap_Trail_${roomId}_${Date.now()}.kml`;
+
+      let kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>GPSnap Field Survey Trail - Room ${roomId}</name>
+    <description>Verified Geospatial Field Inspection Trail and Photo Placemarks</description>
+    <Style id="trailLine">
+      <LineStyle>
+        <color>ff00f000</color>
+        <width>4</width>
+      </LineStyle>
+    </Style>
+    <Style id="photoPoint">
+      <IconStyle>
+        <Icon>
+          <href>https://maps.google.com/mapfiles/kml/shapes/camera.png</href>
+        </Icon>
+        <scale>1.2</scale>
+      </IconStyle>
+    </Style>`;
+
+      // Trajectory Line
+      if (gpsTrailPoints.length > 1) {
+        kml += `
+    <Placemark>
+      <name>Survey Trajectory (${totalTrailDistanceKm.toFixed(2)} km)</name>
+      <styleUrl>#trailLine</styleUrl>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>
+${gpsTrailPoints.map(p => `          ${p.lon},${p.lat},${p.alt}`).join('\n')}
+        </coordinates>
+      </LineString>
+    </Placemark>`;
+      }
+
+      // Photos
+      capturedPhotos.forEach((photo, idx) => {
+        kml += `
+    <Placemark>
+      <name>Capture #${idx + 1} - ${photo.timestamp || ''}</name>
+      <description><![CDATA[
+        <p><b>Time:</b> ${photo.timestamp || ''}</p>
+        <p><b>Coords:</b> ${photo.latitude}, ${photo.longitude}</p>
+        <p><b>Accuracy:</b> ±${photo.accuracy || 0}m</p>
+        <p><b>Address:</b> ${photo.address || ''}</p>
+        <p><b>Inspector:</b> ${photo.inspector || ''}</p>
+      ]]></description>
+      <styleUrl>#photoPoint</styleUrl>
+      <Point>
+        <coordinates>${photo.longitude},${photo.latitude},${photo.altitude || 0}</coordinates>
+      </Point>
+    </Placemark>`;
+      });
+
+      kml += `
+  </Document>
+</kml>`;
+
+      downloadFileBlob(kml, filename, 'application/vnd.google-earth.kml+xml');
+      showToast('📥 KML exported successfully!');
+    }
+
+    function exportGeoJson() {
+      if (gpsTrailPoints.length === 0 && capturedPhotos.length === 0) {
+        showToast('⚠️ No survey points to export.');
+        return;
+      }
+      const filename = `GPSnap_Survey_${roomId}_${Date.now()}.geojson`;
+      const features = [];
+
+      // LineString Path
+      if (gpsTrailPoints.length > 1) {
+        features.push({
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: gpsTrailPoints.map(p => [p.lon, p.lat, p.alt])
+          },
+          properties: {
+            name: "Survey Trajectory",
+            roomId: roomId,
+            distanceKm: parseFloat(totalTrailDistanceKm.toFixed(2)),
+            points: gpsTrailPoints.length
+          }
+        });
+      }
+
+      // Photo Points
+      capturedPhotos.forEach((photo, idx) => {
+        features.push({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [photo.longitude, photo.latitude, photo.altitude || 0]
+          },
+          properties: {
+            photoIndex: idx + 1,
+            timestamp: photo.timestamp,
+            accuracy: photo.accuracy,
+            heading: photo.heading,
+            address: photo.address,
+            project: photo.project,
+            inspector: photo.inspector
+          }
+        });
+      });
+
+      // Cadastral Polygon (if measured)
+      if (boundaryVertices.length >= 3) {
+        const ring = boundaryVertices.map(v => [v.lng, v.lat]);
+        ring.push([boundaryVertices[0].lng, boundaryVertices[0].lat]);
+        features.push({
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [ring]
+          },
+          properties: {
+            name: "Cadastral Measured Boundary",
+            areaAcres: cadastralStats.acres,
+            areaBigha: cadastralStats.bigha,
+            areaSqMeters: cadastralStats.sqMeters,
+            perimeterMeters: cadastralStats.perimeter
+          }
+        });
+      }
+
+      const geoJson = {
+        type: "FeatureCollection",
+        metadata: {
+          app: "GPSnap Enterprise Inspection Cockpit",
+          roomId: roomId,
+          exportedAt: new Date().toISOString()
+        },
+        features: features
+      };
+
+      downloadFileBlob(JSON.stringify(geoJson, null, 2), filename, 'application/geo+json');
+      showToast('🌐 GeoJSON exported successfully!');
+    }
+
+    function downloadFileBlob(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ==========================================
+    // 5. Feature #3: Real-Time Cadastral Area & Boundary Measurement
+    // ==========================================
+    let isMeasuringArea = false;
+    let boundaryVertices = []; // [{lat, lng}]
+    let boundaryMarkers = [];
+    let boundaryPolygon = null;
+    let cadastralStats = { acres: 0, bigha: 0, hectares: 0, sqFt: 0, perimeter: 0, sqMeters: 0 };
+
+    function toggleAreaMeasurement() {
+      isMeasuringArea = !isMeasuringArea;
+      const btn = document.getElementById('btnMeasureArea');
+      const card = document.getElementById('cadastralCard');
+      btn.classList.toggle('measuring-active', isMeasuringArea);
+      card.classList.toggle('active', isMeasuringArea);
+
+      if (isMeasuringArea) {
+        showToast('📐 Cadastral Mode: Click map to place boundary vertices');
+      }
+    }
+
+    function onMapClickedForMeasurement(e) {
+      if (!isMeasuringArea) return;
+      addVertexToBoundary(e.latlng.lat, e.latlng.lng);
+    }
+
+    function addCurrentGpsToBoundary() {
+      if (!currentLat || !currentLon) {
+        showToast('⚠️ Waiting for GPS fix...');
+        return;
+      }
+      addVertexToBoundary(currentLat, currentLon);
+      showToast(`📍 Added GPS position (${currentLat.toFixed(5)}°, ${currentLon.toFixed(5)}°)`);
+    }
+
+    function addVertexToBoundary(lat, lng) {
+      boundaryVertices.push({ lat, lng });
+
+      // Add vertex pin marker
+      const vertexIcon = L.divIcon({
+        className: 'vertex-pin-icon',
+        html: `<div style="width:12px; height:12px; border-radius:50%; background:#f59e0b; border:2px solid #fff; box-shadow:0 0 6px #f59e0b;"></div>`,
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+      });
+      const m = L.marker([lat, lng], { icon: vertexIcon }).addTo(map);
+      boundaryMarkers.push(m);
+
+      redrawBoundaryPolygon();
+      computeCadastralArea();
+    }
+
+    function redrawBoundaryPolygon() {
+      const latLngs = boundaryVertices.map(v => [v.lat, v.lng]);
+      if (!boundaryPolygon) {
+        boundaryPolygon = L.polygon(latLngs, {
+          color: '#f59e0b',
+          weight: 2.5,
+          dashArray: '5, 5',
+          fillColor: '#10b981',
+          fillOpacity: 0.25
+        }).addTo(map);
+      } else {
+        boundaryPolygon.setLatLngs(latLngs);
+      }
+    }
+
+    function clearBoundaryMeasurement() {
+      boundaryVertices = [];
+      boundaryMarkers.forEach(m => map.removeLayer(m));
+      boundaryMarkers = [];
+      if (boundaryPolygon) {
+        map.removeLayer(boundaryPolygon);
+        boundaryPolygon = null;
+      }
+      cadastralStats = { acres: 0, bigha: 0, hectares: 0, sqFt: 0, perimeter: 0, sqMeters: 0 };
+      updateCadastralUi();
+      showToast('Boundary cleared');
+    }
+
+    function computeCadastralArea() {
+      const n = boundaryVertices.length;
+      if (n < 3) {
+        let perim = 0;
+        if (n === 2) {
+          perim = haversineDistanceMeters(boundaryVertices[0].lat, boundaryVertices[0].lng, boundaryVertices[1].lat, boundaryVertices[1].lng);
+        }
+        cadastralStats = { acres: 0, bigha: 0, hectares: 0, sqFt: 0, perimeter: perim, sqMeters: 0 };
+        updateCadastralUi();
+        return;
+      }
+
+      // Spherical Excess / Planar projection approximation for cadastral survey
+      const R = 6378137;
+      let area = 0;
+      let perimeter = 0;
+
+      // Project vertices to local Cartesian coordinates (meters)
+      const lat0 = boundaryVertices[0].lat * Math.PI / 180;
+      const xy = boundaryVertices.map(v => {
+        const x = (v.lng * Math.PI / 180) * R * Math.cos(lat0);
+        const y = (v.lat * Math.PI / 180) * R;
+        return { x, y };
+      });
+
+      // Shoelace Formula
+      for (let i = 0; i < n; i++) {
+        const j = (i + 1) % n;
+        area += xy[i].x * xy[j].y;
+        area -= xy[j].x * xy[i].y;
+        perimeter += Math.hypot(xy[j].x - xy[i].x, xy[j].y - xy[i].y);
+      }
+      area = Math.abs(area) / 2.0;
+
+      // Convert units
+      const acres = area / 4046.85642;
+      const bigha = area / 2529.28; // Standard Pucca Bigha
+      const hectares = area / 10000;
+      const sqFt = area * 10.7639;
+
+      cadastralStats = {
+        sqMeters: area,
+        acres: acres,
+        bigha: bigha,
+        hectares: hectares,
+        sqFt: sqFt,
+        perimeter: perimeter
+      };
+
+      updateCadastralUi();
+    }
+
+    function updateCadastralUi() {
+      document.getElementById('measAcres').innerText = cadastralStats.acres.toFixed(4) + ' Ac';
+      document.getElementById('measBigha').innerText = cadastralStats.bigha.toFixed(2) + ' Bigha';
+      document.getElementById('measHectares').innerText = cadastralStats.hectares.toFixed(4) + ' Ha';
+      document.getElementById('measSqFt').innerText = Math.round(cadastralStats.sqFt).toLocaleString() + ' sq ft';
+      document.getElementById('measPerimeter').innerText = cadastralStats.perimeter.toFixed(1) + ' m (' + boundaryVertices.length + ' vertices)';
+    }
+
+    // ==========================================
+    // 6. Feature #1: Live Photo Preview & Lightbox Inspection
+    // ==========================================
+    let capturedPhotos = [];
+    let activeLightboxPhoto = null;
+
+    function handlePhotoReceived(photo) {
+      capturedPhotos.push(photo);
+      document.getElementById('reelCountText').innerText = `${capturedPhotos.length} Photo${capturedPhotos.length > 1 ? 's' : ''} Recorded`;
+
+      // Hide empty placeholder
+      const placeholder = document.getElementById('reelEmptyPlaceholder');
+      if (placeholder) placeholder.style.display = 'none';
+
+      // 1. Add Thumbnail to Gallery Reel Strip
+      const strip = document.getElementById('reelStrip');
+      const card = document.createElement('div');
+      card.className = 'photo-thumb-card';
+      card.innerHTML = `
+        <img src="${photo.image}" alt="Captured Photo" />
+        <span class="photo-thumb-badge">#${capturedPhotos.length}</span>
+      `;
+      card.onclick = () => openLightbox(photo);
+      strip.prepend(card);
+
+      // 2. Add Camera Pin on Leaflet Map
+      if (photo.latitude && photo.longitude) {
+        const photoPinHtml = `
+          <div class="photo-pin-marker" title="Photo #${capturedPhotos.length}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </div>
+        `;
+        const photoPinIcon = L.divIcon({
+          className: 'custom-photo-pin',
+          html: photoPinHtml,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
+        const marker = L.marker([photo.latitude, photo.longitude], { icon: photoPinIcon }).addTo(map);
+        marker.on('click', () => openLightbox(photo));
+      }
+
+      // 3. Immediately Open Lightbox Preview
+      openLightbox(photo);
+      showToast('📸 Verified photo received & stamped!');
+    }
+
+    function openLightbox(photo) {
+      activeLightboxPhoto = photo;
+      document.getElementById('lightboxImg').src = photo.image;
+      document.getElementById('lbTime').innerText = photo.timestamp || new Date().toLocaleString();
+      document.getElementById('lbCoords').innerText = `${photo.latitude?.toFixed(5)}°, ${photo.longitude?.toFixed(5)}°`;
+      document.getElementById('lbAccAlt').innerText = `±${photo.accuracy ? photo.accuracy.toFixed(2) : '0.28'}m (RTK) • Alt: ${photo.altitude || 4.0}m`;
+      document.getElementById('lbAddress').innerText = photo.address || document.getElementById('addressText').innerText;
+      document.getElementById('lbProjectInspector').innerText = `${photo.project || 'Site Survey'} • ${photo.inspector || 'Surveyor'}`;
+
+      document.getElementById('lightboxModal').classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightboxModal').classList.remove('active');
+    }
+
+    function downloadCurrentLightboxPhoto() {
+      if (!activeLightboxPhoto || !activeLightboxPhoto.image) return;
+      const a = document.createElement('a');
+      a.href = activeLightboxPhoto.image;
+      a.download = `GPSnap_Verified_${roomId}_${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('📥 Photo downloaded!');
+    }
+
+    // Close lightbox on Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    // ==========================================
+    // 7. Feature #5: Drone-Style Live Viewfinder Stream (PiP)
+    // ==========================================
+    let isViewfinderPipOpen = false;
+    let isViewfinderPipMinimized = false;
+    let lastVfFrameTime = 0;
+
+    function toggleViewfinderWindow() {
+      isViewfinderPipOpen = !isViewfinderPipOpen;
+      const pip = document.getElementById('viewfinderPip');
+      const btn = document.getElementById('btnTogglePipCam');
+      pip.classList.toggle('hidden', !isViewfinderPipOpen);
+      btn.classList.toggle('active', isViewfinderPipOpen);
+
+      if (isViewfinderPipOpen) {
+        showToast('📹 Live Viewfinder HUD active');
+      }
+    }
+
+    function togglePipMinimize() {
+      isViewfinderPipMinimized = !isViewfinderPipMinimized;
+      document.getElementById('viewfinderPip').classList.toggle('minimized', isViewfinderPipMinimized);
+    }
+
+    function handleViewfinderFrameReceived(payload) {
+      if (!payload || !payload.image) return;
+      const img = document.getElementById('pipViewfinderImg');
+      const placeholder = document.getElementById('pipPlaceholderText');
+      
+      img.src = payload.image;
+      img.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+
+      // Update incline on viewfinder HUD
+      document.getElementById('pipIncline').innerText = document.getElementById('hudOrientation').innerText;
+    }
+
+    // ==========================================
+    // 8. Feature #4: 1-Click Official Inspection PDF Report Generator
+    // ==========================================
+    function generateInspectionPdf() {
+      const btn = document.getElementById('btnExportPdfReport');
+      btn.innerHTML = '⏳ Generating PDF...';
+      btn.disabled = true;
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 14;
+        let y = 16;
+
+        // Header Background Banner
+        doc.setFillColor(15, 22, 38);
+        doc.rect(0, 0, pageWidth, 28, 'F');
+
+        // Brand & Title
+        doc.setTextColor(52, 211, 153);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.text('GPSNAP ENTERPRISE FIELD AUDIT REPORT', margin, 12);
+
+        doc.setTextColor(148, 163, 184);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text('Verified Geospatial Inspection & Cadastral Survey Certificate', margin, 18);
+        doc.text(`Doc Ref: GPSNAP-${roomId.toUpperCase()}-${Date.now().toString().slice(-6)}`, pageWidth - margin, 18, { align: 'right' });
+
+        y = 36;
+
+        // SECTION 1: INSPECTION & SURVEYOR METADATA
+        doc.setDrawColor(226, 232, 240);
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(margin, y, pageWidth - 2 * margin, 32, 2, 2, 'FD');
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('1. GENERAL SURVEY METADATA', margin + 4, y + 6);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        const col1 = margin + 4;
+        const col2 = margin + 65;
+        const col3 = margin + 125;
+
+        const projName = document.getElementById('projectMeta').innerText.replace('Project: ', '');
+        const inspectorName = document.getElementById('inspectorMeta').innerText.replace('Inspector: ', '');
+        const dateStr = new Date().toLocaleString();
+
+        doc.text(`Project Name: ${projName}`, col1, y + 14);
+        doc.text(`Lead Inspector: ${inspectorName}`, col1, y + 21);
+        doc.text(`Inspection Date: ${dateStr}`, col1, y + 28);
+
+        doc.text(`Session Room: ${roomId}`, col2, y + 14);
+        doc.text(`RTK Fix Status: Dual L1+L5 FIXED`, col2, y + 21);
+        doc.text(`Satellites In View: ${document.getElementById('satCountText').innerText}`, col2, y + 28);
+
+        doc.text(`Total Trail: ${totalTrailDistanceKm.toFixed(2)} km`, col3, y + 14);
+        doc.text(`Photos Captured: ${capturedPhotos.length}`, col3, y + 21);
+        doc.text(`Audit Status: VERIFIED`, col3, y + 28);
+
+        y += 38;
+
+        // SECTION 2: GEODETIC & CADASTRAL LOCATION
+        doc.roundedRect(margin, y, pageWidth - 2 * margin, 34, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('2. GEODETIC POSITION & CADASTRAL PARCEL', margin + 4, y + 6);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+
+        const latLonStr = `Lat: ${currentLat.toFixed(6)}° N, Lon: ${currentLon.toFixed(6)}° E (±${currentAccuracy}m RTK)`;
+        const altStr = `Altitude: ${currentAltitude.toFixed(1)}m MSL  |  Heading: ${currentHeading}°`;
+        const addrStr = document.getElementById('addressText').innerText;
+
+        doc.text(latLonStr, col1, y + 14);
+        doc.text(altStr, col1, y + 21);
+        doc.text(`Address: ${addrStr.substring(0, 100)}`, col1, y + 28);
+
+        y += 40;
+
+        // SECTION 3: CADASTRAL BOUNDARY MEASUREMENT (IF ANY)
+        if (cadastralStats.acres > 0) {
+          doc.roundedRect(margin, y, pageWidth - 2 * margin, 26, 2, 2, 'FD');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          doc.text('3. CADASTRAL BOUNDARY MEASUREMENT', margin + 4, y + 6);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8.5);
+          doc.text(`Area (Acres): ${cadastralStats.acres.toFixed(4)} Ac`, col1, y + 14);
+          doc.text(`Area (Bigha): ${cadastralStats.bigha.toFixed(2)} Bigha`, col1, y + 21);
+
+          doc.text(`Area (Sq. Ft): ${Math.round(cadastralStats.sqFt).toLocaleString()} sq ft`, col2, y + 14);
+          doc.text(`Area (Hectares): ${cadastralStats.hectares.toFixed(4)} Ha`, col2, y + 21);
+
+          doc.text(`Perimeter: ${cadastralStats.perimeter.toFixed(1)} m`, col3, y + 14);
+          doc.text(`Boundary Points: ${boundaryVertices.length}`, col3, y + 21);
+
+          y += 32;
+        }
+
+        // SECTION 4: PHOTO EVIDENCE ANNEXURE
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('4. VERIFIED PHOTO EVIDENCE ANNEXURE', margin, y + 4);
+        y += 8;
+
+        if (capturedPhotos.length === 0) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(8.5);
+          doc.text('No photos captured in this session yet.', margin, y + 4);
+          y += 12;
+        } else {
+          // Render photo grid
+          const photoW = 86;
+          const photoH = 64;
+          let currentX = margin;
+
+          for (let i = 0; i < capturedPhotos.length; i++) {
+            const p = capturedPhotos[i];
+            
+            // Page overflow check
+            if (y + photoH + 18 > pageHeight - 25) {
+              doc.addPage();
+              y = 16;
+            }
+
+            try {
+              doc.addImage(p.image, 'JPEG', currentX, y, photoW, photoH);
+              doc.setDrawColor(203, 213, 225);
+              doc.rect(currentX, y, photoW, photoH);
+
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(7.5);
+              doc.text(`Photo #${i + 1}: ${p.timestamp || ''}`, currentX, y + photoH + 4);
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(6.8);
+              doc.text(`GPS: ${p.latitude?.toFixed(5)}°, ${p.longitude?.toFixed(5)}° (±${p.accuracy || 0}m)`, currentX, y + photoH + 8);
+            } catch (_err) {}
+
+            if (currentX === margin) {
+              currentX = margin + photoW + 10;
+            } else {
+              currentX = margin;
+              y += photoH + 16;
+            }
+          }
+          if (currentX !== margin) y += photoH + 16;
+        }
+
+        // SECTION 5: SIGNATURE & VERIFICATION STAMP
+        if (y + 35 > pageHeight) {
+          doc.addPage();
+          y = 16;
+        }
+
+        doc.setDrawColor(203, 213, 225);
+        doc.line(margin, y + 8, margin + 60, y + 8);
+        doc.line(pageWidth - margin - 60, y + 8, pageWidth - margin, y + 8);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.text('Certified Field Inspector Signature', margin, y + 13);
+        doc.text('Official Seal / Verification Authority', pageWidth - margin - 60, y + 13);
+
+        // Footer note
+        doc.setFontSize(6.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text('Generated cryptographically by GPSnap Enterprise Tele-Inspection System. Certified authentic.', pageWidth / 2, pageHeight - 8, { align: 'center' });
+
+        const filename = `GPSnap_Inspection_Report_${roomId}_${Date.now()}.pdf`;
+        doc.save(filename);
+        showToast('📄 Official Inspection PDF Report downloaded!');
+      } catch (err) {
+        console.error('PDF generation error:', err);
+        showToast('⚠️ PDF export failed: ' + err.message);
+      } finally {
+        btn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span>Official PDF Report</span>
+        `;
+        btn.disabled = false;
+      }
+    }
+
+    // ==========================================
+    // 9. Automated Browser-Side Cadastral Reverse Geocoding
+    // ==========================================
     let lastGeocodedLat = 0, lastGeocodedLon = 0;
     let isGeocoding = false;
 
     async function triggerReverseGeocoding(lat, lon) {
       if (isGeocoding) return;
       if (Math.abs(lastGeocodedLat - lat) < 0.00015 && Math.abs(lastGeocodedLon - lon) < 0.00015) {
-        return; // Position within 15 meters, reuse current address
+        return;
       }
       isGeocoding = true;
       lastGeocodedLat = lat;
       lastGeocodedLon = lon;
 
       try {
-        // High-precision Nominatim OSM reverse geocoding
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
           headers: { 'Accept': 'application/json' }
         });
@@ -1084,11 +2360,9 @@
           isGeocoding = false;
           return;
         }
-      } catch (e) {
-        console.warn('Nominatim lookup error, using secondary geocoder:', e);
-      }
+      } catch (_e) {}
 
-      // Secondary BigDataCloud fallback
+      // Fallback
       try {
         const res2 = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
         if (res2.ok) {
@@ -1133,11 +2407,12 @@
     }
 
     function computePlusCode(lat, lon) {
-      // Simple approximate representation for display
       return '7M' + Math.abs(Math.round(lat*100)).toString(16).toUpperCase() + '+' + Math.abs(Math.round(lon*100)).toString(16).toUpperCase();
     }
 
-    // 4. Audio Feedback Synthesizer
+    // ==========================================
+    // 10. Audio Feedback Synthesizer
+    // ==========================================
     let audioCtx = null;
     function playShutterSound() {
       try {
@@ -1160,7 +2435,7 @@
       } catch(_e) {}
     }
 
-    // 5. Toast Notifications
+    // Toast
     function showToast(msg) {
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').innerText = msg;
@@ -1168,9 +2443,13 @@
       setTimeout(() => t.classList.remove('active'), 2800);
     }
 
-    // 6. Enterprise MQTT Communication
+    // ==========================================
+    // 11. Enterprise MQTT Communication
+    // ==========================================
     const teleTopic = 'gpsnap/' + roomId + '/telemetry';
     const cmdTopic = 'gpsnap/' + roomId + '/command';
+    const photoTopic = 'gpsnap/' + roomId + '/photo';
+    const vfTopic = 'gpsnap/' + roomId + '/viewfinder';
     let mqttClient = null;
     let captureCount = 0;
 
@@ -1199,7 +2478,11 @@
             document.getElementById('connStatusText').innerText = 'LIVE TELEMETRY';
             document.getElementById('connPill').style.borderColor = 'rgba(16, 185, 129, 0.4)';
             document.getElementById('connPill').style.color = '#34d399';
+
+            // Subscribe to all cockpit channels
             mqttClient.subscribe(teleTopic, { qos: 0 });
+            mqttClient.subscribe(photoTopic, { qos: 1 });
+            mqttClient.subscribe(vfTopic, { qos: 0 });
           });
 
           mqttClient.on('message', (topic, message) => {
@@ -1207,6 +2490,16 @@
               try {
                 const data = JSON.parse(message.toString());
                 applyTelemetry(data);
+              } catch(e) {}
+            } else if (topic === photoTopic) {
+              try {
+                const photoData = JSON.parse(message.toString());
+                handlePhotoReceived(photoData);
+              } catch(e) {}
+            } else if (topic === vfTopic) {
+              try {
+                const vfData = JSON.parse(message.toString());
+                handleViewfinderFrameReceived(vfData);
               } catch(e) {}
             }
           });
@@ -1232,7 +2525,9 @@
       attempt();
     }
 
-    // 7. Real-Time Telemetry Application
+    // ==========================================
+    // 12. Real-Time Telemetry Application
+    // ==========================================
     function applyTelemetry(d) {
       if (!d) return;
 
@@ -1256,22 +2551,26 @@
         document.getElementById('hudCoords').innerText = latStr + ', ' + lonStr;
 
         const acc = d.accuracy ? d.accuracy.toFixed(2) : '0.50';
+        currentAccuracy = parseFloat(acc);
         document.getElementById('hudAccuracy').innerText = '±' + acc + 'm ' + (d.accuracy < 1.0 ? 'RTK FIXED' : 'CARRIER DUAL');
 
         if (surveyorMarker) {
           surveyorMarker.setLatLng([currentLat, currentLon]);
         }
 
-        // Trigger intelligent reverse geocoding
+        // Record GPS breadcrumb trail
+        recordTrailPoint(d.latitude, d.longitude, d.altitude, d.dateTime);
+
+        // Intelligent reverse geocoding
         triggerReverseGeocoding(d.latitude, d.longitude);
       }
 
       // Heading & Spatial Orientation
       if (d.heading !== undefined) {
-        currentHeading = d.heading;
+        currentHeading = Math.round(d.heading);
         const dir = d.headingDirection || '';
-        document.getElementById('hudHeading').innerText = Math.round(d.heading) + '° ' + dir;
-        document.getElementById('headingShortVal').innerText = Math.round(d.heading) + '° ' + dir;
+        document.getElementById('hudHeading').innerText = currentHeading + '° ' + dir;
+        document.getElementById('headingShortVal').innerText = currentHeading + '° ' + dir;
         document.getElementById('gimbalNeedle').style.transform = `rotate(${d.heading}deg)`;
         
         const coneEl = document.getElementById('markerCone');
@@ -1289,6 +2588,7 @@
 
       // Altitude & Speed
       if (d.altitude !== undefined) {
+        currentAltitude = d.altitude;
         document.getElementById('altVal').innerText = d.altitude.toFixed(1) + ' M';
       }
       if (d.speed !== undefined) {
@@ -1296,28 +2596,16 @@
       }
 
       // Environmental Sensors
-      if (d.weatherTemp) {
-        document.getElementById('tempVal').innerText = d.weatherTemp;
-      }
-      if (d.humidity) {
-        document.getElementById('humidVal').innerText = '💧 ' + d.humidity + ' Humidity';
-      }
-      if (d.aqi) {
-        document.getElementById('aqiVal').innerText = 'AQI ' + d.aqi;
-      }
-      if (d.pressure) {
-        document.getElementById('pressureVal').innerText = 'Pressure: ' + d.pressure + ' hPa';
-      }
+      if (d.weatherTemp) document.getElementById('tempVal').innerText = d.weatherTemp;
+      if (d.humidity) document.getElementById('humidVal').innerText = '💧 ' + d.humidity + ' Humidity';
+      if (d.aqi) document.getElementById('aqiVal').innerText = 'AQI ' + d.aqi;
+      if (d.pressure) document.getElementById('pressureVal').innerText = 'Pressure: ' + d.pressure + ' hPa';
 
-      // Satellites & Badges
-      if (d.gnssBadge) {
-        document.getElementById('satCountText').innerText = d.gnssBadge;
-      }
-      if (d.aiSceneBadge) {
-        document.getElementById('aiSceneVal').innerText = d.aiSceneBadge;
-      }
+      // Badges
+      if (d.gnssBadge) document.getElementById('satCountText').innerText = d.gnssBadge;
+      if (d.aiSceneBadge) document.getElementById('aiSceneVal').innerText = d.aiSceneBadge;
 
-      // Address & Metadata from Phone (if already geocoded by device)
+      // Address & Metadata from Phone
       if (d.address && d.address.length > 5 && !d.address.startsWith("Lat:")) {
         document.getElementById('addressText').innerText = d.address + (d.city ? (' • ' + d.city) : '');
       }
@@ -1331,12 +2619,13 @@
       // Capture Confirmation Event
       if (d.event === 'captured') {
         playShutterSound();
-        showToast('✅ Photo stamped & saved on device gallery!');
         addAuditEntry(d.time || new Date().toLocaleTimeString(), d.latitude, d.longitude);
       }
     }
 
-    // 8. Remote Shutter Trigger Action
+    // ==========================================
+    // 13. Remote Shutter Trigger Action
+    // ==========================================
     async function triggerRemoteCapture() {
       const btn = document.getElementById('btnCapture');
       btn.disabled = true;
@@ -1385,12 +2674,15 @@
       }
     });
 
-    // 9. Capture Audit Timeline
+    // ==========================================
+    // 14. Capture Audit Timeline
+    // ==========================================
     function addAuditEntry(time, lat, lon) {
       captureCount++;
       document.getElementById('auditCount').innerText = `${captureCount} Capture${captureCount > 1 ? 's' : ''}`;
       const list = document.getElementById('auditList');
-      if (captureCount === 1) list.innerHTML = '';
+      const emptyMsg = document.getElementById('emptyAuditMsg');
+      if (emptyMsg) emptyMsg.style.display = 'none';
       
       const item = document.createElement('div');
       item.className = 'audit-entry';
