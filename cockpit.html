@@ -692,9 +692,9 @@
       </button>
 
       <!-- Channel Room Box -->
-      <div class="gcs-room-pill" title="Live Channel Room">
-        <span style="font-size:9.5px; font-weight:800; color:var(--text-tertiary);">ROOM</span>
-        <input type="text" id="roomInput" spellcheck="false" autocomplete="off" />
+      <div class="gcs-room-pill" title="Live Channel Room / PIN">
+        <span style="font-size:9.5px; font-weight:800; color:var(--text-tertiary);">PIN</span>
+        <input type="text" id="roomInput" spellcheck="false" autocomplete="off" placeholder="839-492" />
       </div>
 
       <!-- Share Button -->
@@ -875,13 +875,23 @@
     }
 
     // 2. Room & Session Identification
+    function normalizeRoomId(raw) {
+      let v = (raw || '').trim();
+      // If user typed 6 continuous digits without hyphen (e.g. 839492), normalize to 839-492
+      if (/^\d{6}$/.test(v)) {
+        v = v.substring(0, 3) + '-' + v.substring(3, 6);
+      }
+      return v;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
-    let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'snap-639a3b3b';
+    let rawRoom = urlParams.get('room') || window.location.hash.replace('#', '') || '';
+    let roomId = normalizeRoomId(rawRoom) || '839-492';
     
     const roomInput = document.getElementById('roomInput');
     roomInput.value = roomId;
     roomInput.addEventListener('change', () => {
-      const v = roomInput.value.trim();
+      const v = normalizeRoomId(roomInput.value);
       if (v && v !== roomId) {
         window.location.search = '?room=' + encodeURIComponent(v);
       }
