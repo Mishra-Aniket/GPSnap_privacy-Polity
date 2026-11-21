@@ -15,18 +15,20 @@
   
   <style>
     /* =========================================================================
-       THEME ENGINE: JET BLACK (OLED True Black) & LIGHT MODE
+       THEME ENGINE: APPLE TRANSLUCENT LIQUID GLASS (VisionOS & macOS Style)
        ========================================================================= */
     :root, [data-theme="jetblack"] {
       --bg-space: #000000;
-      --glass-surface: rgba(10, 12, 16, 0.88);
-      --glass-elevated: rgba(16, 20, 28, 0.94);
-      --glass-border: rgba(255, 255, 255, 0.12);
+      /* Apple visionOS / macOS Dark Liquid Frosted Glass */
+      --glass-surface: rgba(14, 18, 26, 0.62);
+      --glass-elevated: rgba(22, 28, 40, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.15);
       --glass-border-glow: rgba(16, 185, 129, 0.35);
+      --glass-specular: inset 0 1px 1px rgba(255, 255, 255, 0.18);
       
       --text-primary: #ffffff;
-      --text-secondary: #94a3b8;
-      --text-tertiary: #64748b;
+      --text-secondary: rgba(255, 255, 255, 0.72);
+      --text-tertiary: rgba(255, 255, 255, 0.45);
       
       --neon-emerald: #10b981;
       --neon-emerald-glow: rgba(16, 185, 129, 0.25);
@@ -36,18 +38,20 @@
       --neon-orange: #f97316;
       --neon-rose: #ef4444;
       
-      --chip-bg: rgba(255, 255, 255, 0.06);
-      --card-shadow: 0 16px 45px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0, 0, 0, 0.5);
-      --map-filter: contrast(1.08) brightness(0.95);
-      --modal-bg: rgba(8, 10, 14, 0.94);
+      --chip-bg: rgba(255, 255, 255, 0.08);
+      --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 4px 14px rgba(0, 0, 0, 0.4);
+      --map-filter: contrast(1.06) brightness(0.96);
+      --modal-bg: rgba(14, 18, 26, 0.82);
     }
 
     [data-theme="light"] {
       --bg-space: #f1f5f9;
-      --glass-surface: rgba(255, 255, 255, 0.92);
-      --glass-elevated: rgba(248, 250, 252, 0.98);
-      --glass-border: rgba(0, 0, 0, 0.12);
+      /* Apple visionOS / macOS Light Liquid Frosted Glass */
+      --glass-surface: rgba(255, 255, 255, 0.68);
+      --glass-elevated: rgba(255, 255, 255, 0.82);
+      --glass-border: rgba(255, 255, 255, 0.75);
       --glass-border-glow: rgba(5, 150, 105, 0.35);
+      --glass-specular: inset 0 1px 1px rgba(255, 255, 255, 0.95), 0 2px 4px rgba(0, 0, 0, 0.02);
       
       --text-primary: #0f172a;
       --text-secondary: #475569;
@@ -61,10 +65,10 @@
       --neon-orange: #ea580c;
       --neon-rose: #dc2626;
       
-      --chip-bg: rgba(0, 0, 0, 0.05);
-      --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
+      --chip-bg: rgba(0, 0, 0, 0.04);
+      --card-shadow: 0 16px 45px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.04);
       --map-filter: contrast(1.02) brightness(1.0);
-      --modal-bg: rgba(255, 255, 255, 0.96);
+      --modal-bg: rgba(255, 255, 255, 0.84);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -75,7 +79,7 @@
       overflow: hidden;
       background: var(--bg-space);
       color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       user-select: none;
       -webkit-font-smoothing: antialiased;
       transition: background 0.3s ease, color 0.3s ease;
@@ -98,18 +102,18 @@
       display: none !important;
     }
 
-    /* Common Frosted Glass Capsule */
+    /* Apple Signature Frosted Liquid Glass */
     .gcs-glass-panel {
       background: var(--glass-surface);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
       border: 1px solid var(--glass-border);
-      box-shadow: var(--card-shadow);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--glass-specular), var(--card-shadow);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* =========================================================================
-       2. TOP FLOATING "DYNAMIC ISLAND" CAPSULE
+       2. TOP FLOATING "DYNAMIC ISLAND" (Clean Apple Pill with Unified Lat/Lon)
        ========================================================================= */
     .gcs-dynamic-island {
       position: absolute;
@@ -119,8 +123,8 @@
       z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 6px 14px;
+      gap: 12px;
+      padding: 6px 16px;
       border-radius: 9999px;
       pointer-events: auto;
       max-width: calc(100vw - 32px);
@@ -130,21 +134,22 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
     .gcs-brand-logo {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--neon-emerald) 0%, var(--neon-cyan) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #000;
-      font-size: 14px;
+      font-size: 13px;
       box-shadow: 0 0 12px var(--neon-emerald-glow);
     }
     .gcs-brand-title {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 800;
       letter-spacing: -0.2px;
       color: var(--text-primary);
@@ -165,6 +170,7 @@
       padding: 3px 8px;
       border-radius: 12px;
       letter-spacing: 0.3px;
+      flex-shrink: 0;
     }
     .radar-pulse-dot {
       width: 6px;
@@ -183,30 +189,58 @@
       width: 1px;
       height: 18px;
       background: var(--glass-border);
+      flex-shrink: 0;
     }
 
-    .gcs-telemetry-readout {
-      display: flex;
+    /* UNIFIED HORIZONTAL LATITUDE & LONGITUDE STRIP (Apple Style, Never Breaks) */
+    .gcs-coords-capsule {
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-family: ui-monospace, monospace;
-      font-size: 11.5px;
+      white-space: nowrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
       font-weight: 700;
+      flex-shrink: 0;
     }
-    .gcs-coords-text { color: var(--neon-cyan); }
+    .gcs-coord-pair {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .gcs-coord-axis {
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+    }
+    .gcs-coord-value {
+      color: var(--neon-cyan);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .gcs-coord-dot {
+      color: var(--text-tertiary);
+      font-size: 9px;
+    }
     .gcs-acc-badge {
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.35);
       color: var(--neon-emerald);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 9.5px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
     }
 
     .gcs-island-actions {
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     /* ACTION PILL BUTTONS IN ISLAND */
@@ -237,19 +271,6 @@
     }
     .gcs-btn-island-pill.active svg {
       stroke: #000;
-    }
-
-    .live-dot-indicator {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--neon-rose);
-      box-shadow: 0 0 6px var(--neon-rose);
-      animation: liveBlink 1.4s infinite;
-    }
-    @keyframes liveBlink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.25; }
     }
 
     .gcs-room-pill {
@@ -303,7 +324,7 @@
       align-items: center;
       gap: 4px;
       padding: 4px;
-      border-radius: 12px;
+      border-radius: 14px;
       pointer-events: auto;
     }
 
@@ -314,7 +335,7 @@
       font-size: 11px;
       font-weight: 700;
       padding: 5px 9px;
-      border-radius: 8px;
+      border-radius: 9px;
       cursor: pointer;
       transition: all 0.15s ease;
       display: flex;
@@ -340,7 +361,7 @@
       left: 20px;
       width: 320px;
       z-index: 1000;
-      border-radius: 18px;
+      border-radius: 22px;
       padding: 14px;
       display: flex;
       flex-direction: column;
@@ -414,7 +435,7 @@
       height: 160px;
       background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, rgba(0, 0, 0, 0.75) 75%);
       border: 1px solid var(--glass-border);
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -443,7 +464,7 @@
     .gimbal-strip-card {
       background: var(--chip-bg);
       border: 1px solid var(--glass-border);
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 7px 10px;
       display: flex;
       align-items: center;
@@ -475,7 +496,7 @@
     .gcs-tile {
       background: var(--chip-bg);
       border: 1px solid var(--glass-border);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 6px 8px;
       display: flex;
       flex-direction: column;
@@ -499,7 +520,7 @@
     }
 
     /* =========================================================================
-       5. FLOATING DRONE FPV CAMERA & PHOTO VIEW WINDOW (Picture-In-Picture)
+       5. FLOATING DRONE FPV CAMERA & PHOTO VIEW WINDOW (Apple Glass PiP)
        ========================================================================= */
     .gcs-fpv-window {
       position: absolute;
@@ -507,13 +528,13 @@
       right: 20px;
       width: 400px;
       z-index: 1050;
-      border-radius: 18px;
+      border-radius: 22px;
       display: none;
       flex-direction: column;
       overflow: hidden;
       border: 1.5px solid var(--glass-border-glow);
       pointer-events: auto;
-      box-shadow: var(--card-shadow), 0 0 30px rgba(16, 185, 129, 0.15);
+      box-shadow: var(--card-shadow), 0 0 35px rgba(16, 185, 129, 0.15);
       animation: fpvPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     @keyframes fpvPopIn {
@@ -547,7 +568,7 @@
       gap: 4px;
       background: var(--chip-bg);
       padding: 2px;
-      border-radius: 8px;
+      border-radius: 9px;
     }
     .gcs-fpv-tab {
       background: transparent;
@@ -556,7 +577,7 @@
       font-size: 10px;
       font-weight: 700;
       padding: 3px 8px;
-      border-radius: 6px;
+      border-radius: 7px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -748,7 +769,7 @@
     }
 
     /* =========================================================================
-       6. BOTTOM FLOATING MISSION COMMAND CENTER CAPSULE
+       6. BOTTOM MISSION COMMAND CENTER CAPSULE (Apple Glass Capsule)
        ========================================================================= */
     .gcs-command-center {
       position: absolute;
@@ -757,7 +778,7 @@
       transform: translateX(-50%);
       width: min(880px, calc(100vw - 36px));
       z-index: 1000;
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 12px 18px;
       display: flex;
       flex-direction: column;
@@ -803,7 +824,7 @@
       gap: 10px;
       cursor: pointer;
       padding: 3px 6px;
-      border-radius: 8px;
+      border-radius: 10px;
       transition: background 0.15s ease;
     }
     .gcs-address-row:hover {
@@ -844,7 +865,7 @@
     .gcs-chip {
       background: var(--chip-bg);
       border: 1px solid var(--glass-border);
-      border-radius: 6px;
+      border-radius: 7px;
       padding: 3px 7px;
       font-size: 9.5px;
       color: var(--text-secondary);
@@ -908,7 +929,7 @@
     .btn-gcs-sub {
       background: var(--chip-bg);
       border: 1px solid var(--glass-border);
-      border-radius: 10px;
+      border-radius: 11px;
       padding: 9px 13px;
       color: var(--text-primary);
       font-size: 11.5px;
@@ -924,6 +945,15 @@
       border-color: var(--text-primary);
       background: rgba(255, 255, 255, 0.12);
     }
+    .btn-gcs-sub.active {
+      background: var(--neon-emerald) !important;
+      color: #000000 !important;
+      border-color: var(--neon-emerald) !important;
+      box-shadow: 0 0 14px var(--neon-emerald-glow) !important;
+    }
+    .btn-gcs-sub.active svg {
+      stroke: #000000 !important;
+    }
 
     /* =========================================================================
        7. FULL CADASTRAL ADDRESS INSPECTOR MODAL
@@ -932,8 +962,8 @@
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       z-index: 2500;
       display: none;
       align-items: center;
@@ -951,9 +981,11 @@
 
     .gcs-cadastral-card {
       background: var(--modal-bg);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
       border: 1.5px solid var(--glass-border-glow);
       box-shadow: var(--card-shadow), 0 0 40px rgba(16, 185, 129, 0.2);
-      border-radius: 20px;
+      border-radius: 22px;
       width: min(680px, 95vw);
       max-height: 85vh;
       overflow-y: auto;
@@ -1136,8 +1168,8 @@
       background: var(--glass-elevated) !important;
       color: var(--text-primary) !important;
       border: 1px solid var(--glass-border) !important;
-      backdrop-filter: blur(14px) !important;
-      border-radius: 12px !important;
+      backdrop-filter: blur(18px) !important;
+      border-radius: 14px !important;
       box-shadow: var(--card-shadow) !important;
     }
     .leaflet-popup-tip {
@@ -1183,10 +1215,10 @@
   <div id="map"></div>
 
   <!-- =========================================================================
-       2. TOP DYNAMIC ISLAND CAPSULE
+       2. TOP DYNAMIC ISLAND CAPSULE (Apple Liquid Glass with Unified Coordinates)
        ========================================================================= -->
   <header class="gcs-glass-panel gcs-dynamic-island" id="dynamicIsland">
-    <!-- Brand -->
+    <!-- Brand Mark -->
     <div class="gcs-brand-mark">
       <div class="gcs-brand-logo">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
@@ -1205,22 +1237,24 @@
 
     <div class="gcs-island-divider"></div>
 
-    <!-- Real-time Position & Precision Readout -->
-    <div class="gcs-telemetry-readout">
-      <span class="gcs-coords-text" id="hudCoords">25.39217° N, 81.88324° E</span>
+    <!-- UNIFIED LATITUDE & LONGITUDE STRIP (Apple Style, Never Breaks Into Multi-lines) -->
+    <div class="gcs-coords-capsule" id="coordsStrip">
+      <div class="gcs-coord-pair">
+        <span class="gcs-coord-axis">LAT</span>
+        <span class="gcs-coord-value" id="hudLat">25.39217° N</span>
+      </div>
+      <div class="gcs-coord-dot">•</div>
+      <div class="gcs-coord-pair">
+        <span class="gcs-coord-axis">LON</span>
+        <span class="gcs-coord-value" id="hudLon">81.88324° E</span>
+      </div>
       <span class="gcs-acc-badge" id="hudAccuracy">±0.28m RTK FIXED</span>
     </div>
 
     <div class="gcs-island-divider"></div>
 
-    <!-- Island Actions: Live FPV, Zen HUD, Theme, Room, Share -->
+    <!-- Island Actions: Zen HUD, Theme, Room, Share (Cleaned up: Live Cam moved to bottom!) -->
     <div class="gcs-island-actions">
-      <!-- LIVE FPV CAMERA & PHOTO VIEW BUTTON -->
-      <button class="gcs-btn-island-pill" id="btnToggleFpv" onclick="toggleFpvWindow()" title="Open Live Drone FPV Camera & Photo Viewer (V)">
-        <span class="live-dot-indicator" id="fpvLiveDot"></span>
-        <span id="fpvBtnLabel">📹 Live Cam / Photo</span>
-      </button>
-
       <!-- ZEN MODE (Hide/Show All HUDs) -->
       <button class="gcs-btn-island-pill" onclick="toggleZenMode()" title="Toggle Zen Fullscreen Map (H)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1441,7 +1475,7 @@
   </div>
 
   <!-- =========================================================================
-       6. BOTTOM MISSION COMMAND CENTER CAPSULE
+       6. BOTTOM MISSION COMMAND CENTER CAPSULE (Holds the Single Live Cam Button)
        ========================================================================= -->
   <footer class="gcs-glass-panel gcs-command-center" id="commandCenter">
     <!-- Minimize / Expand Handle -->
@@ -1478,7 +1512,7 @@
       </div>
     </div>
 
-    <!-- Bottom Row: Aerospace Shutter Trigger Button & Quick Tools -->
+    <!-- Bottom Row: Aerospace Shutter Trigger Button & Quick Tools (Live Cam is exclusively here!) -->
     <div class="gcs-actions-row">
       <!-- Main Trigger Shutter Button -->
       <button class="btn-gcs-shutter" id="btnCapture" onclick="triggerRemoteCapture()">
@@ -1501,12 +1535,13 @@
         <span>Full Address</span>
       </button>
 
-      <button class="btn-gcs-sub" onclick="toggleFpvWindow()" title="Toggle Live Camera Feed (V)">
+      <!-- SINGLE EXCLUSIVE LIVE CAM BUTTON -->
+      <button class="btn-gcs-sub" id="btnBottomLiveCam" onclick="toggleFpvWindow()" title="Toggle Live Camera Feed (V)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="23 7 16 12 23 17 23 7"></polygon>
           <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
         </svg>
-        <span>Live Cam</span>
+        <span id="bottomLiveCamText">Live Cam</span>
       </button>
 
       <button class="btn-gcs-sub" onclick="openInGoogleMaps()" title="Open in Google Maps">
@@ -1723,7 +1758,7 @@
       modal.classList.remove('active');
     }
 
-    // 4. Panel Minimization / Hiding Engine ("baki har chize hide ho paye jiski need na ho")
+    // 4. Panel Minimization / Hiding Engine ("baki har chize hide ho paye")
     function toggleAvionicsDrawer() {
       const d = document.getElementById('avionicsDrawer');
       const pill = document.getElementById('radarDockPill');
@@ -1762,7 +1797,7 @@
       }
     }
 
-    // 5. LIVE FPV CAMERA & PHOTO VIEW ENGINE
+    // 5. LIVE FPV CAMERA & PHOTO VIEW ENGINE (Triggered exclusively from bottom button!)
     let isFpvActive = false;
     let fpvMode = 'live'; // 'live' or 'photo'
     let lastPhotoData = null;
@@ -1772,17 +1807,17 @@
     function toggleFpvWindow() {
       isFpvActive = !isFpvActive;
       const win = document.getElementById('fpvWindow');
-      const btn = document.getElementById('btnToggleFpv');
+      const btnBottom = document.getElementById('btnBottomLiveCam');
       
       if (isFpvActive) {
         win.classList.add('active');
-        btn.classList.add('active');
+        if (btnBottom) btnBottom.classList.add('active');
         setFpvMode('live');
         requestLiveStream();
         showToast('📹 Live FPV Cam activated');
       } else {
         win.classList.remove('active');
-        btn.classList.remove('active');
+        if (btnBottom) btnBottom.classList.remove('active');
         showToast('Live Cam closed');
       }
     }
@@ -1977,7 +2012,7 @@
       }
     }
 
-    // 7. Polar Satellite Constellation Radar Visualizer with Smooth Sweep Animation
+    // 7. Polar Satellite Constellation Radar Visualizer with Smooth 60FPS Sweep Animation
     let radarSweepAngle = 0;
     function startRadarAnimation() {
       function renderLoop() {
@@ -2187,7 +2222,7 @@
       setTimeout(() => t.classList.remove('active'), 2800);
     }
 
-    // 11. Enterprise MQTT Communication (Always ready for telemetry, photo & live stream)
+    // 11. Enterprise MQTT Communication
     const teleTopic = 'gpsnap/' + roomId + '/telemetry';
     const cmdTopic = 'gpsnap/' + roomId + '/command';
     let mqttClient = null;
@@ -2218,7 +2253,6 @@
             document.getElementById('connPill').style.borderColor = 'rgba(16, 185, 129, 0.4)';
             document.getElementById('connPill').style.color = '#10b981';
             
-            // Subscribe to all essential topics immediately
             mqttClient.subscribe(teleTopic, { qos: 0 });
             mqttClient.subscribe(photoTopic, { qos: 0 });
             mqttClient.subscribe(vfTopic, { qos: 0 });
@@ -2279,13 +2313,18 @@
 
       document.getElementById('btnCapture').disabled = false;
 
-      // Coordinates & Accuracy
+      // Coordinates & Accuracy: Uniform Latitude & Longitude
       if (d.latitude || d.longitude) {
         currentLat = d.latitude;
         currentLon = d.longitude;
         const latStr = Math.abs(d.latitude).toFixed(5) + '° ' + (d.latitude >= 0 ? 'N' : 'S');
         const lonStr = Math.abs(d.longitude).toFixed(5) + '° ' + (d.longitude >= 0 ? 'E' : 'W');
-        document.getElementById('hudCoords').innerText = latStr + ', ' + lonStr;
+        
+        const elLat = document.getElementById('hudLat');
+        const elLon = document.getElementById('hudLon');
+        if (elLat) elLat.innerText = latStr;
+        if (elLon) elLon.innerText = lonStr;
+        
         document.getElementById('modalCoords').innerText = d.latitude.toFixed(6) + '° N, ' + d.longitude.toFixed(6) + '° E';
         document.getElementById('fpvHudCoords').innerText = latStr + ', ' + lonStr;
 
@@ -2305,7 +2344,7 @@
         triggerReverseGeocoding(d.latitude, d.longitude);
       }
 
-      // Heading & Spatial Orientation (Rotates cone on map & compass ribbon)
+      // Heading & Spatial Orientation
       if (d.heading !== undefined) {
         currentHeading = d.heading;
         const dir = d.headingDirection || '';
@@ -2316,7 +2355,7 @@
         updateMarkerHeading(d.heading);
       }
 
-      // Gyroscopic Pitch & Roll: Tilts the Artificial Horizon Ladder in Live Viewfinder!
+      // Gyroscopic Pitch & Roll: Tilts the Artificial Horizon in Live Viewfinder
       if (d.pitch !== undefined && d.roll !== undefined) {
         document.getElementById('hudOrientation').innerText = `P: ${Math.round(d.pitch)}° • R: ${Math.round(d.roll)}°`;
         const horizon = document.getElementById('fpvHorizonLadder');
