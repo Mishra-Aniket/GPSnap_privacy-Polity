@@ -22,15 +22,22 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; flex-direction: column; }
-    .container { max-width: 900px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .container { max-width: 900px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; gap: 14px; }
     
     /* Header */
-    .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--card-border); }
+    .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--card-border); flex-wrap: wrap; gap: 10px; }
     .header-title h1 { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
     .header-title p { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+    .header-status-box { display: flex; align-items: center; gap: 8px; }
     .status-badge { display: flex; align-items: center; gap: 6px; background: rgba(0, 230, 118, 0.15); border: 1px solid var(--accent); color: var(--accent); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
+    .room-chip { background: #1e293b; color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.4); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; font-family: monospace; }
     .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 1.8s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+    /* Room Bar */
+    .room-bar { display: flex; gap: 8px; align-items: center; background: #131d2e; border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 10px; }
+    .room-bar input { flex: 1; background: #0b0f19; border: 1px solid #283956; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12.5px; font-family: monospace; }
+    .room-bar button { background: var(--cyan); color: #0b0f19; border: none; font-weight: bold; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
 
     /* Badges Bar */
     .badge-bar { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -100,10 +107,20 @@
         <h1>🛰️ GPSnap • Cockpit</h1>
         <p>Live Real-Time Tele-Inspection & Remote Shutter</p>
       </div>
-      <div class="status-badge" id="connStatus">
-        <div class="pulse-dot"></div>
-        <span id="connText">CONNECTING</span>
+      <div class="header-status-box">
+        <span class="room-chip" id="roomChip">ROOM: --</span>
+        <div class="status-badge" id="connStatus">
+          <div class="pulse-dot"></div>
+          <span id="connText">CONNECTING</span>
+        </div>
       </div>
+    </div>
+
+    <!-- Interactive Room Bar (in case query param was omitted) -->
+    <div class="room-bar">
+      <span style="font-size: 11.5px; color: var(--text-muted); font-weight: bold;">ROOM ID:</span>
+      <input type="text" id="roomInput" placeholder="e.g. snap-58eb3f26" />
+      <button onclick="changeRoomManual()">Connect</button>
     </div>
 
     <!-- Live Tech Badges -->
@@ -117,7 +134,7 @@
       <div class="card">
         <h3>Coordinates</h3>
         <div class="val" id="coordsVal">--</div>
-        <div class="sub" id="accVal">Accuracy: Acquiring...</div>
+        <div class="sub" id="accVal">Accuracy: Acquiring GPS...</div>
       </div>
       <div class="card">
         <h3>Altitude & Speed</h3>
@@ -152,13 +169,22 @@
   <div class="toast" id="toast">Photo capture signal sent to device!</div>
 
   <script>
-    // Extract room id from URL (?room=XYZ or #XYZ)
     const urlParams = new URLSearchParams(window.location.search);
     let roomId = urlParams.get('room') || window.location.hash.replace('#', '') || 'session';
+
+    document.getElementById('roomChip').innerText = 'ROOM: ' + roomId;
+    document.getElementById('roomInput').value = roomId;
+
+    function changeRoomManual() {
+      const val = document.getElementById('roomInput').value.trim();
+      if (!val) return;
+      window.location.search = '?room=' + encodeURIComponent(val);
+    }
 
     let map, marker;
     let lastLat = 0, lastLon = 0;
     let mqttClient = null;
+    let hasReceivedFirstPacket = false;
     let isLocalMode = window.location.port === '8080';
 
     function initMap() {
@@ -191,6 +217,10 @@
         const clientId = 'gpsnap_web_' + Math.random().toString(16).substring(2, 10);
 
         try {
+          if (mqttClient) {
+            try { mqttClient.end(true); } catch(_e) {}
+          }
+
           mqttClient = mqtt.connect(url, {
             clientId: clientId,
             clean: true,
@@ -199,10 +229,12 @@
           });
 
           mqttClient.on('connect', () => {
-            document.getElementById('connText').innerText = 'LIVE CONNECTED';
+            document.getElementById('connText').innerText = 'BROKER CONNECTED';
             document.getElementById('connStatus').style.borderColor = '#00E676';
             document.getElementById('connStatus').style.color = '#00E676';
-            mqttClient.subscribe(teleTopic, { qos: 0 });
+            mqttClient.subscribe(teleTopic, { qos: 0 }, (err) => {
+              if (!err) console.log('Subscribed to topic:', teleTopic);
+            });
           });
 
           mqttClient.on('message', (topic, message) => {
@@ -210,7 +242,9 @@
               try {
                 const data = JSON.parse(message.toString());
                 applyTelemetry(data);
-              } catch(e) {}
+              } catch(e) {
+                console.error('Error parsing JSON payload:', e);
+              }
             }
           });
 
@@ -220,7 +254,6 @@
             document.getElementById('connStatus').style.color = '#FFD54F';
             if (currentBrokerIdx < brokers.length - 1) {
               currentBrokerIdx++;
-              mqttClient.end(true);
               setTimeout(attemptConnect, 1000);
             }
           });
@@ -257,6 +290,11 @@
     function applyTelemetry(d) {
       if (!d) return;
 
+      if (!hasReceivedFirstPacket) {
+        hasReceivedFirstPacket = true;
+        showToast('📡 Live telemetry received from field phone!');
+      }
+
       if (d.event === 'session_ended' || d.status === 'expired') {
         document.getElementById('connText').innerText = 'SESSION EXPIRED / OFFLINE';
         document.getElementById('connStatus').style.borderColor = '#FF5252';
@@ -267,10 +305,13 @@
         return;
       }
 
+      document.getElementById('connText').innerText = 'LIVE TELEMETRY ACTIVE';
+      document.getElementById('connStatus').style.borderColor = '#00E676';
+      document.getElementById('connStatus').style.color = '#00E676';
       document.getElementById('btnCapture').disabled = false;
 
-      if (d.latitude && d.longitude) {
-        document.getElementById('coordsVal').innerText = d.latitude.toFixed(5) + '°, ' + d.longitude.toFixed(5) + '°';
+      if (d.latitude || d.longitude) {
+        document.getElementById('coordsVal').innerText = (d.latitude ? d.latitude.toFixed(5) : '0.00000') + '°, ' + (d.longitude ? d.longitude.toFixed(5) : '0.00000') + '°';
         document.getElementById('accVal').innerText = 'Accuracy: ±' + (d.accuracy ? d.accuracy.toFixed(1) : '1.5') + ' M';
         
         if (Math.abs(lastLat - d.latitude) > 0.0001 || Math.abs(lastLon - d.longitude) > 0.0001) {
